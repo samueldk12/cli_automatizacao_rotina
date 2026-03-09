@@ -2,7 +2,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Set
 
 from myc.config import load_config
 from myc.monitor import Monitor, get_monitor
@@ -18,6 +18,8 @@ DAYS_DISPLAY = {
     "sabado": "Sábado",
     "domingo": "Domingo",
 }
+
+_NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
 
 def find_browser(browser: str = "chrome") -> str:
@@ -47,15 +49,45 @@ def find_browser(browser: str = "chrome") -> str:
         if Path(ff).exists():
             return ff
 
-    # Fallback: espera que esteja no PATH
     return browser
 
 
-def _try_reposition_window(monitor: Monitor, delay: float = 2.0) -> None:
+def _get_chrome_handles() -> Set[int]:
+    """Retorna o conjunto de handles de janelas Chrome visíveis no momento."""
+    try:
+        result = subprocess.run(
+            [
+                "powershell", "-NoProfile", "-NonInteractive", "-Command",
+                "Get-Process chrome -ErrorAction SilentlyContinue"
+                " | Where-Object { $_.MainWindowHandle -ne 0 }"
+                " | ForEach-Object { $_.MainWindowHandle.ToInt64() }",
+            ],
+            capture_output=True,
+            text=True,
+            creationflags=_NO_WINDOW,
+        )
+        handles: Set[int] = set()
+        for line in result.stdout.strip().splitlines():
+            try:
+                handles.add(int(line.strip()))
+            except ValueError:
+                pass
+        return handles
+    except Exception:
+        return set()
+
+
+def _reposition_new_window(before_handles: Set[int], monitor: Monitor) -> None:
     """
-    Tenta mover a janela do Chrome mais recente para o monitor correto via PowerShell.
-    Necessário quando Chrome já está aberto (ignora --window-position no processo existente).
+    Aguarda uma *nova* janela Chrome surgir (não presente em before_handles)
+    e a move para o monitor especificado via Win32 API.
+    Bloqueante — retorna quando a janela foi movida ou após timeout (~8 s).
     """
+    if before_handles:
+        before_ps = "@(" + ", ".join(str(h) for h in before_handles) + ")"
+    else:
+        before_ps = "@()"
+
     ps_script = f"""
 Add-Type @"
 using System;
@@ -67,19 +99,49 @@ public class WinAPI {{
     public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     [DllImport("user32.dll")]
     public static extern bool SetForegroundWindow(IntPtr hWnd);
+    [DllImport("user32.dll")]
+    public static extern bool RedrawWindow(IntPtr hWnd, IntPtr lprcUpdate, IntPtr hrgnUpdate, uint flags);
 }}
 "@
-Start-Sleep -Milliseconds {int(delay * 1000)}
-$chrome = Get-Process chrome -ErrorAction SilentlyContinue | Sort-Object StartTime -Descending | Select-Object -First 1
-if ($chrome -and $chrome.MainWindowHandle -ne 0) {{
-    [WinAPI]::MoveWindow($chrome.MainWindowHandle, {monitor.x}, {monitor.y}, {monitor.width}, {monitor.height}, $true)
-    [WinAPI]::ShowWindow($chrome.MainWindowHandle, 3)
+
+$before = {before_ps}
+$newHwnd = [IntPtr]::Zero
+
+# Poll ate 8 s (80 x 100 ms)
+for ($i = 0; $i -lt 80; $i++) {{
+    Start-Sleep -Milliseconds 100
+    $procs = Get-Process chrome -ErrorAction SilentlyContinue | Where-Object {{ $_.MainWindowHandle -ne 0 }}
+    foreach ($p in $procs) {{
+        $h = $p.MainWindowHandle.ToInt64()
+        if ($before -notcontains $h) {{
+            $newHwnd = $p.MainWindowHandle
+            break
+        }}
+    }}
+    if ($newHwnd -ne [IntPtr]::Zero) {{ break }}
+}}
+
+if ($newHwnd -ne [IntPtr]::Zero) {{
+    Start-Sleep -Milliseconds 400
+    # 1) Minimiza para forcar o Chrome a sair do estado atual
+    [WinAPI]::ShowWindow($newHwnd, 6)
+    Start-Sleep -Milliseconds 150
+    # 2) Move para o monitor correto enquanto minimizado
+    [WinAPI]::MoveWindow($newHwnd, {monitor.x}, {monitor.y}, {monitor.width}, {monitor.height}, $true)
+    Start-Sleep -Milliseconds 150
+    # 3) Restaura e maximiza — força a GPU a repintar no novo monitor
+    [WinAPI]::ShowWindow($newHwnd, 9)
+    Start-Sleep -Milliseconds 100
+    [WinAPI]::ShowWindow($newHwnd, 3)
+    [WinAPI]::SetForegroundWindow($newHwnd)
+    # 4) Forca repaint completo (RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN = 0x0181)
+    [WinAPI]::RedrawWindow($newHwnd, [IntPtr]::Zero, [IntPtr]::Zero, 0x0181)
 }}
 """
     try:
-        subprocess.Popen(
+        subprocess.run(
             ["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_script],
-            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
+            creationflags=_NO_WINDOW,
         )
     except Exception:
         pass
@@ -91,29 +153,26 @@ def open_url_on_monitor(
     new_window: bool = True,
     browser: str = "chrome",
 ) -> None:
-    """Abre uma URL em um monitor específico."""
+    """Abre uma URL em um monitor específico e garante que a janela esteja no lugar certo."""
     exe = find_browser(browser)
     monitor = get_monitor(monitor_index)
+
+    # Captura handles existentes ANTES de abrir o Chrome
+    before_handles = _get_chrome_handles()
 
     cmd = [exe]
     if new_window:
         cmd.append("--new-window")
-
-    # --window-position funciona quando Chrome não está aberto ainda.
-    # Quando já está aberto, usamos PowerShell para reposicionar.
+    # Hint de posição (funciona quando Chrome ainda não está rodando)
     cmd += [
         f"--window-position={monitor.x},{monitor.y}",
         f"--window-size={monitor.width},{monitor.height}",
     ]
     cmd.append(url)
-
     subprocess.Popen(cmd)
 
-    # Aguarda janela abrir e tenta reposicionar via API Windows
-    _try_reposition_window(monitor, delay=2.0)
-
-    # Delay entre janelas para evitar conflito de foco
-    time.sleep(0.8)
+    # Detecta e reposiciona APENAS a janela recém-criada
+    _reposition_new_window(before_handles, monitor)
 
 
 def open_app(path: str, args: List[str] = None) -> None:
@@ -128,7 +187,7 @@ def run_command(group: str, subcommand: str, day: Optional[str] = None) -> bool:
 
     Args:
         group:      Nome do grupo (ex: "estudar")
-        subcommand: Nome do subcomando (ex: "visao-computacional")
+        subcommand: Nome do subcomando (ex: "visao")
         day:        Dia da semana opcional (ex: "segunda")
 
     Returns:
