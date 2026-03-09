@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "myc"
+version = "1.0.0"
+description = "MYC - Gerenciador de Comandos Personalizados para sites e aplicativos"
+requires-python = ">=3.9"
+dependencies = [
+    "click>=8.1",
+    "rich>=13.0",
+    "questionary>=2.0",
+    "screeninfo>=0.8",
+]
+
+[project.scripts]
+myc = "myc.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["myc*"]
