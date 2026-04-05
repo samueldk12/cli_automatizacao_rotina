@@ -15,6 +15,16 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
+from myc.agent import (
+    create_agent_wizard,
+    delete_agent,
+    launch_agent,
+    list_agents,
+)
+from myc.agent_plugins import (
+    create_plugin_wizard,
+    list_plugins as list_agent_plugins,
+)
 from myc.config import BIN_DIR, CONFIG_FILE, load_config, save_config
 from myc.monitor import get_monitors
 from myc.runner import DAYS_DISPLAY, DAYS_PT, find_browser, run_command
@@ -591,3 +601,138 @@ def config_cmd() -> None:
             settings["chrome_path"] = new_val
             save_config(config)
             console.print("[green]✓ Configuração salva.[/green]")
+
+
+# ─── agent ────────────────────────────────
+
+@main.group(name="agent")
+def agent_cmd() -> None:
+    """Gerencia agentes de IA e integra com rotinas MYC."""
+    pass
+
+
+@agent_cmd.command(name="add")
+def agent_add() -> None:
+    """Cria um novo perfil de agente de IA (wizard interativo)."""
+    create_agent_wizard()
+
+
+@agent_cmd.command(name="list")
+def agent_list_cmd() -> None:
+    """Lista todos os agentes configurados."""
+    list_agents()
+
+
+@agent_cmd.command(name="launch")
+@click.argument("name")
+@click.option("--cwd", default=None, help="Diretorio de trabalho do agente")
+def agent_launch_cmd(name: str, cwd: Optional[str]) -> None:
+    """Lanca um agente salvo no diretorio de trabalho."""
+    rc = launch_agent(name, cwd=cwd)
+    if rc != 0:
+        sys.exit(rc)
+
+
+@agent_cmd.command(name="delete")
+@click.argument("name")
+def agent_delete_cmd(name: str) -> None:
+    """Remove um agente configurado."""
+    delete_agent(name)
+
+
+@agent_cmd.command(name="history")
+@click.option("--agent", "-a", default=None, help="Filtrar por agente")
+@click.option("--limit", "-n", default=20, help="Numero de entradas")
+def agent_history_cmd(agent: Optional[str], limit: int) -> None:
+    """Mostra historico de uso dos agentes."""
+    from myc.agent import show_agent_history
+    show_agent_history(agent_filter=agent, limit=limit)
+
+
+@agent_cmd.command(name="plugins")
+def agent_plugins_cmd() -> None:
+    """Lista plugins disponiveis para agentes."""
+    from rich.table import Table
+    plugins = list_agent_plugins()
+    if not plugins:
+        console.print("[yellow]Nenhum plugin instalado.[/yellow]")
+        console.print("Use [cyan]myc agent plugin-add[/cyan] para criar um.")
+        return
+    table = Table(title="Plugins de Agentes", show_lines=True)
+    table.add_column("ID", style="cyan")
+    table.add_column("Nome", style="yellow")
+    table.add_column("Descricao", style="green")
+    for p in plugins:
+        table.add_row(p["id"], p["name"], p["description"])
+    console.print(table)
+
+
+@agent_cmd.command(name="plugin-add")
+def agent_plugin_add_cmd() -> None:
+    """Cria um novo plugin de agente (wizard)."""
+    create_plugin_wizard()
+
+
+@agent_cmd.command(name="bundle-install")
+@click.argument("bundles", nargs=-1, required=False)
+@click.option("--all", "all_bundles", is_flag=True, help="Instala todos os bundles")
+@click.option("--agent", "-a", default=None, help="Vincula ao agente especifico")
+def agent_bundle_install(bundles: tuple, all_bundles: bool, agent: Optional[str]) -> None:
+    """Instala bundles de plugins e vincula a um agente.
+
+    \b
+    Exemplos:
+      myc agent bundle-install --all
+      myc agent bundle-install bugbounty --agent dev
+      myc agent bundle-install marketing visao_computacional --agent default
+    """
+    from myc.plugin_manager import install_bundles, register_bundle_install
+
+    if all_bundles or (not bundles and not agent):
+        install_bundles(all_=all_bundles)
+        return
+
+    bundle_list = list(bundles)
+    install_bundles(names=bundle_list)
+
+    if agent:
+        for b in bundle_list:
+            register_bundle_install(b, agent)
+
+
+@agent_cmd.command(name="bundles")
+def agent_bundles_list() -> None:
+    """Lista bundles disponiveis e status de instalacao."""
+    from myc.plugin_manager import list_bundles
+    list_bundles()
+
+
+@agent_cmd.command(name="install-plugin")
+@click.argument("filepath")
+def agent_install_plugin_file(filepath: str) -> None:
+    """Instala um plugin a partir de um arquivo .py local.
+
+    \b
+    Exemplo:
+      myc agent install-plugin ~/meu_plugin.py
+    """
+    from myc.plugin_installer import install_plugin_from_file
+    install_plugin_from_file(filepath)
+
+
+# ─── automate ─────────────────────────────
+
+@main.command(name="automate")
+@click.argument("agent_name")
+@click.option("--group", "-g", default=None, help="Executa comandos de um grupo MYC")
+@click.option("--subcommand", "-s", default=None, help="Subcomando especifico")
+def automate_cmd(agent_name: str, group: Optional[str], subcommand: Optional[str]) -> None:
+    """Lanca um agente e executa rotinas MYC como contexto.
+
+    \b
+    Exemplos:
+      myc automate dev --group estudar
+      myc automate dev --group trabalhar --subcommand daily-standup
+    """
+    from myc.agent import launch_with_myc_tasks
+    launch_with_myc_tasks(agent_name, group=group, subcommand=subcommand)
