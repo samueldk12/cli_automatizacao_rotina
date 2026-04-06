@@ -1,3 +1,5 @@
+import os
+import subprocess
 import sys
 from pathlib import Path
 from typing import Optional
@@ -67,6 +69,15 @@ def _generate_wrapper(group_name: str) -> None:
         f'}}\n',
         encoding="utf-8",
     )
+
+
+def _find_openclaude_binary() -> Optional[str]:
+    for path in os.environ.get("PATH", "").split(os.pathsep):
+        for name in ("openclaude", "openclaude.cmd", "openclaude.exe"):
+            candidate = Path(path) / name
+            if candidate.exists():
+                return str(candidate)
+    return None
 
 
 def _add_to_path_windows(directory: str) -> bool:
@@ -603,6 +614,18 @@ def config_cmd() -> None:
             console.print("[green]✓ Configuração salva.[/green]")
 
 
+@main.command(name="config-html")
+@click.option("--port", "-p", default=8787, help="Porta do dashboard (default: 8787)")
+def config_html_cmd(port: int) -> None:
+    """Abre dashboard web local com todas as configuracoes.
+
+    Mostra agentes, rotinas, plugins, historico e estatisticas
+    em uma pagina HTML interativa.
+    """
+    from myc.html_dashboard import serve_dashboard
+    serve_dashboard(port=port)
+
+
 # ─── agent ────────────────────────────────
 
 @main.group(name="agent")
@@ -673,51 +696,106 @@ def agent_plugin_add_cmd() -> None:
     create_plugin_wizard()
 
 
-@agent_cmd.command(name="bundle-install")
-@click.argument("bundles", nargs=-1, required=False)
-@click.option("--all", "all_bundles", is_flag=True, help="Instala todos os bundles")
-@click.option("--agent", "-a", default=None, help="Vincula ao agente especifico")
-def agent_bundle_install(bundles: tuple, all_bundles: bool, agent: Optional[str]) -> None:
-    """Instala bundles de plugins e vincula a um agente.
+@main.command(name="install")
+@click.argument("target")
+def install_cmd(target: str) -> None:
+    """Instala e configura integracoes.
 
     \b
     Exemplos:
-      myc agent bundle-install --all
-      myc agent bundle-install bugbounty --agent dev
-      myc agent bundle-install marketing visao_computacional --agent default
+      myc install openclaude
     """
-    from myc.plugin_manager import install_bundles, register_bundle_install
+    if target == "openclaude":
+        _install_openclaude()
+    else:
+        console.print(f"[red]Alvo desconhecido: {target}[/red]")
+        console.print("[dim]Alvos disponiveis: openclaude[/dim]")
 
-    if all_bundles or (not bundles and not agent):
-        install_bundles(all_=all_bundles)
+
+def _install_openclaude() -> None:
+    import subprocess
+    import questionary
+
+    console.print(
+        Panel(
+            "[bold cyan]Instalacao do OpenClaude[/bold cyan]\n\n"
+            "O OpenClaude permite usar IA via CLI — qualquer modelo "
+            "(GPT, Claude, Gemini, Llama, Qwen).\n\n"
+            "[dim]Modelo padrao: qwen/qwen3.6-plus:free (via OpenRouter)[/dim]",
+            border_style="cyan",
+        )
+    )
+
+    if not _find_openclaude_binary():
+        if questionary.confirm(
+            "Instalar OpenClaude agora? (requer npm)", default=True
+        ).ask():
+            console.print("\nInstalando OpenClaude via npm...")
+            try:
+                subprocess.check_call(
+                    ["npm", "install", "-g", "@gitlawb/openclaude"],
+                    stdout=subprocess.DEVNULL,
+                )
+                console.print("[green]OpenClaude instalado![/green]")
+            except Exception:
+                console.print("[yellow]Nao foi possivel instalar via npm.[/yellow]")
+                console.print(
+                    "Instale manualmente: [cyan]npm install -g @gitlawb/openclaude[/cyan]"
+                )
+                console.print("\nVeja o tutorial em video:")
+                console.print("[link]https://www.youtube.com/watch?v=AxE8gDFeMic[/link]\n")
+                return
+
+    console.print("\n[dim]Para configurar sua conta OpenRouter:[/dim]")
+    console.print("1. Acesse [link]https://openrouter.ai/[/link]")
+    console.print("2. Crie uma conta e gere uma API Key")
+    console.print("3. Copie a chave (comeca com sk-or-v1-)")
+    console.print("\nVeja o tutorial em video:")
+    console.print("[link]https://www.youtube.com/watch?v=AxE8gDFeMic[/link]\n")
+
+    api_key = questionary.password("Cole sua OPENAI_API_KEY do OpenRouter:").ask()
+    if not api_key:
+        console.print("[yellow]Chave nao informada. O agente default nao funcionara ate voce configurar.[/yellow]")
+        console.print("\nPara configurar depois:")
+        console.print("  [cyan]myc add-agent --name default[/cyan]")
         return
 
-    bundle_list = list(bundles)
-    install_bundles(names=bundle_list)
+    model = questionary.text("Modelo (padrao: qwen/qwen3.6-plus:free):", default="qwen/qwen3.6-plus:free").ask() or "qwen/qwen3.6-plus:free"
 
-    if agent:
-        for b in bundle_list:
-            register_bundle_install(b, agent)
+    from myc.agent import _load_agents, _save_agents
+    from datetime import datetime
 
+    agents = _load_agents()
+    agents["default"] = {
+        "name": "default",
+        "platform": "openclaude",
+        "env": {
+            "CLAUDE_CODE_USE_OPENAI": "1",
+            "OPENAI_BASE_URL": "https://openrouter.ai/api/v1",
+            "OPENAI_API_KEY": api_key,
+            "OPENAI_MODEL": model,
+        },
+        "cwd": None,
+        "initial_context": "",
+        "custom_command": None,
+        "plugins": [],
+        "linked_routines": [],
+        "created_at": datetime.now().isoformat(),
+    }
+    _save_agents(agents)
 
-@agent_cmd.command(name="bundles")
-def agent_bundles_list() -> None:
-    """Lista bundles disponiveis e status de instalacao."""
-    from myc.plugin_manager import list_bundles
-    list_bundles()
-
-
-@agent_cmd.command(name="install-plugin")
-@click.argument("filepath")
-def agent_install_plugin_file(filepath: str) -> None:
-    """Instala um plugin a partir de um arquivo .py local.
-
-    \b
-    Exemplo:
-      myc agent install-plugin ~/meu_plugin.py
-    """
-    from myc.plugin_installer import install_plugin_from_file
-    install_plugin_from_file(filepath)
+    console.print(
+        Panel(
+            f"[bold green]Agente 'default' configurado![/bold green]\n\n"
+            f"  Modelo:    [cyan]{model}[/cyan]\n"
+            f"  Provider:  OpenRouter (openrouter.ai)\n\n"
+            f"[bold]Como usar:[/bold]\n"
+            f"  [cyan]myc agent launch default[/cyan]         — lancar no diretorio atual\n"
+            f"  [cyan]myc agent launch default --cwd X[/cyan] — lancar em outro diretorio\n"
+            f"  [cyan]myc automate default --group X[/cyan]   — lancar com contexto MYC",
+            border_style="green",
+        )
+    )
 
 
 # ─── automate ─────────────────────────────
