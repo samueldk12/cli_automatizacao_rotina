@@ -232,7 +232,51 @@ def create_agent_wizard() -> None:
     else:
         linked_routines = []
 
-    # Salva
+    # Role do agente (tipo de trabalho que faz)
+    role_choices = [
+        questionary.Choice("Desenvolvedor (código, APIs, apps)", value="dev"),
+        questionary.Choice("Designer/Artista (UI, arte visual, gráficos)", value="artist"),
+        questionary.Choice("Escritor/Redator (textos, copy, conteúdo)", value="writer"),
+        questionary.Choice("Pesquisador/Analista (dados, OSINT, relatórios)", value="researcher"),
+        questionary.Choice("Professor/Educador (aulas, explicações)", value="educator"),
+        questionary.Choice("Músico/Compositor (áudio, música, som)", value="musician"),
+        questionary.Choice("Consultor de Negócios (estratégia, vendas)", value="business"),
+        questionary.Choice("Generalista (todos os tipos)", value="generalist"),
+    ]
+    role = questionary.select("Papel principal do agente:", choices=role_choices).ask() or "generalist"
+
+    # Plugins que este agente trata
+    import json
+    from myc.agent_plugins import list_plugins
+    available_plugins = listPlugins()
+    if available_plugins:
+        console.print("\nSelecione quais plugins este agente vai tratar (ENTER = todos):")
+        plugin_choices = [
+            questionary.Choice(f"{p['name']} ({p['id']})", value=p["id"])
+            for p in available_plugins
+        ]
+        plugin_filter = questionary.checkbox(
+            "Filtro de plugins:",
+            choices=plugin_choices,
+        ).ask() or []
+    else:
+        plugin_filter = []
+
+    # Agentes que este pode chamar
+    agents = _load_agents()
+    if agents:
+        console.print("\nSelecione outros agentes que este pode chamar (ENTER = nenhum):")
+        agent_call_choices = [
+            questionary.Choice(n, value=n)
+            for n in agents
+        ]
+        callable_agents = questionary.checkbox(
+            "Agentes chamáveis:",
+            choices=agent_call_choices,
+        ).ask() or []
+    else:
+        callable_agents = []
+
     agents = _load_agents()
     profile = {
         "name": name,
@@ -242,6 +286,9 @@ def create_agent_wizard() -> None:
         "initial_context": initial_context,
         "custom_command": custom_cmd,
         "linked_routines": linked_routines,
+        "role": role,
+        "plugin_filter": plugin_filter,
+        "callable_agents": callable_agents,
         "created_at": datetime.now().isoformat(),
     }
     agents[name] = profile
@@ -583,3 +630,226 @@ def show_agent_history(agent_filter: str | None = None,
     # Resumo rapido
     agents_seen = set(e["agent"] for e in entries)
     console.print(f"\n[dim]{len(entries)} entradas | {len(agents_seen)} agente(s): {', '.join(sorted(agents_seen))}[/dim]")
+
+
+# ── Roteamento de Plugins para Agentes ─────────────────────
+
+ROLE_TO_BUNDLES = {
+    "dev": ["fullstack", "software_engineering", "computer_engineering", "data_engineering"],
+    "artist": ["gamedesign", "visao_computacional"],
+    "writer": ["jornalismo", "advocacia"],
+    "researcher": ["osint", "bugbounty", "seguranca_web"],
+    "educator": ["professor"],
+    "musician": [],
+    "business": ["vendas", "ideias", "marketing"],
+    "generalist": list(BUNDLES.keys()) if "BUNDLES" in dir() else [],
+}
+
+
+def auto_assign_plugins(agent_name: str) -> None:
+    """Auto-vincula plugins a um agente baseado no seu role."""
+    agents = _load_agents()
+    if agent_name not in agents:
+        console.print(f"[red]Agente '{agent_name}' nao encontrado.[/red]")
+        return
+
+    profile = agents[agent_name]
+    role = profile.get("role", "generalist")
+
+    # Mapeia role para bundles
+    if role == "dev":
+        bundle_ids = ["fullstack", "software_engineering", "computer_engineering", "data_engineering"]
+    elif role == "artist":
+        bundle_ids = ["gamedesign"]
+    elif role == "writer":
+        bundle_ids = ["jornalismo", "advocacia"]
+    elif role == "researcher":
+        bundle_ids = ["osint", "bugbounty", "seguranca_web"]
+    elif role == "educator":
+        bundle_ids = ["professor"]
+    elif role == "musician":
+        bundle_ids = []
+    elif role == "business":
+        bundle_ids = ["vendas", "ideias", "marketing"]
+    else:
+        bundle_ids = list(BUNDLES.keys())
+
+    from myc.plugin_manager import BUNDLES
+
+    all_plugins = []
+    for bid in bundle_ids:
+        if bid in BUNDLES:
+            all_plugins.extend(BUNDLES[bid]["plugins"])
+
+    existing = set(profile.get("plugins", []))
+    new_plugins = [p for p in all_plugins if p not in existing]
+    profile.setdefault("plugins", []).extend(new_plugins)
+    _save_agents(agents)
+
+    console.print(f"[green]{len(new_plugins)} plugins auto-atribuidos ao agente '{agent_name}' (role: {role})[/green]")
+
+
+def link_plugin_to_agent(agent_name: str, plugin_id: str) -> None:
+    """Vincula explicitamente um plugin a um agente."""
+    agents = _load_agents()
+    if agent_name not in agents:
+        console.print(f"[red]Agente '{agent_name}' nao encontrado.[/red]")
+        return
+
+    profile = agents[agent_name]
+    plugins = profile.setdefault("plugins", [])
+    if plugin_id in plugins:
+        console.print(f"[dim]Plugin '{plugin_id}' ja vinculado a '{agent_name}'.[/dim]")
+        return
+
+    plugins.append(plugin_id)
+    # Registra qual plugin vai para qual agente
+    agent_plugin_map = profile.setdefault("agent_plugin_map", {})
+    agent_plugin_map[plugin_id] = agent_name
+
+    _save_agents(agents)
+    console.print(f"[green]Plugin '{plugin_id}' vinculado ao agente '{agent_name}'.[/green]")
+
+
+def link_agent_to_agent(agent_name: str, target_agent: str, bidirectional: bool = False) -> None:
+    """Permite que um agente chame outro agente."""
+    agents = _load_agents()
+    if agent_name not in agents:
+        console.print(f"[red]Agente '{agent_name}' nao encontrado.[/red]")
+        return
+    if target_agent not in agents:
+        console.print(f"[red]Agente '{target_agent}' nao encontrado.[/red]")
+        return
+
+    # Vincula双向
+    callable_list = agents[agent_name].setdefault("callable_agents", [])
+    if target_agent not in callable_list:
+        callable_list.append(target_agent)
+
+    if bidirectional:
+        rev_list = agents[target_agent].setdefault("callable_agents", [])
+        if agent_name not in rev_list:
+            rev_list.append(agent_name)
+
+    _save_agents(agents)
+    console.print(f"[green]Agente '{agent_name}' pode agora chamar '{target_agent}'.[/green]")
+
+
+def unlink_plugin_from_agent(agent_name: str, plugin_id: str) -> None:
+    """Desvincula um plugin de um agente."""
+    agents = _load_agents()
+    if agent_name not in agents:
+        console.print(f"[red]Agente '{agent_name}' nao encontrado.[/red]")
+        return
+
+    profile = agents[agent_name]
+    plugins = profile.get("plugins", [])
+    if plugin_id in plugins:
+        plugins.remove(plugin_id)
+        _save_agents(agents)
+        console.print(f"[green]Plugin '{plugin_id}' desvinculado de '{agent_name}'.[/green]")
+    else:
+        console.print(f"[yellow]Plugin '{plugin_id}' nao estava vinculado.[/yellow]")
+
+
+def unlink_agent_from_agent(agent_name: str, target_agent: str) -> None:
+    """Remove a capacidade de um agente chamar outro."""
+    agents = _load_agents()
+    if agent_name not in agents:
+        console.print(f"[red]Agente '{agent_name}' nao encontrado.[/red]")
+        return
+
+    callable_list = agents[agent_name].get("callable_agents", [])
+    if target_agent in callable_list:
+        callable_list.remove(target_agent)
+        _save_agents(agents)
+        console.print(f"[green]Agente '{agent_name}' nao pode mais chamar '{target_agent}'.[/green]")
+    else:
+        console.print(f"[yellow]Agente '{agent_name}' nao chamava '{target_agent}'.[/yellow]")
+
+
+def call_agent(agent_name: str, query: str, called_by: str | None = None) -> int:
+    """Lanca um agente com uma query, opcionalmente chamado por outro agente.
+
+    Isso permite que agentes chamem outros agentes. Por exemplo:
+    - Um agente 'dev' chama o agente 'artist' para criar UI
+    - Um agente 'researcher' chama o agente 'writer' para escrever relatorio
+    """
+    agents = _load_agents()
+    if agent_name not in agents:
+        console.print(f"[red]Agente '{agent_name}' nao encontrado.[/red]")
+        return 1
+
+    # Verifica se caller tem permissao
+    if called_by:
+        caller_profile = agents.get(called_by, {})
+        caller_can_call = caller_profile.get("callable_agents", [])
+        if agent_name not in caller_can_call:
+            console.print(f"[yellow]Agente '{called_by}' nao tem permissao para chamar '{agent_name}'.[/yellow]")
+            console.print("[dim]Use 'myc agent link-agent <caller> <target>' para liberar.[/dim]")
+            # Continua mesmo assim por enquanto, mas loga
+
+    # Injeta contexto de origem
+    context_prefix = ""
+    if called_by:
+        context_prefix = f"[Chamado pelo agente '{called_by}']\n\n"
+
+    # Grava no CLAUDE.md como sempre
+    profile = agents[agent_name]
+    cwd = profile.get("cwd") or str(Path.cwd())
+    work_dir = Path(cwd)
+    md_path = work_dir / "CLAUDE.md"
+
+    context = profile.get("initial_context", "")
+    full_context = f"{context_prefix}{context}" if context_prefix else context
+
+    if full_context or query:
+        body = f"# Agent: {agent_name}\n\n{full_context}\n\n---\n\n## Tarefa\n\n{context_prefix}{query}"
+        if md_path.exists():
+            existing = md_path.read_text(encoding="utf-8")
+            backup = existing
+            md_path.write_text(body, encoding="utf-8")
+        else:
+            md_path.write_text(body, encoding="utf-8")
+            backup = None
+
+    console.print(f"\n[bold cyan]Chamando agente '{agent_name}'[/bold cyan]")
+    if called_by:
+        console.print(f"[dim]  Solicitado por: {called_by}[/dim]")
+
+    rc = launch_agent(agent_name, cwd=cwd)
+    # Restaura CLAUDE.md
+    if backup is not None:
+        md_path.write_text(backup, encoding="utf-8")
+    elif md_path.exists() and body in md_path.read_text(encoding="utf-8"):
+        md_path.unlink(missing_ok=True)
+
+    return rc
+
+
+def list_agents_detailed() -> None:
+    """Lista agentes com detalhes: role, plugins, callable agents."""
+    from rich.table import Table
+
+    agents = _load_agents()
+    if not agents:
+        console.print("[yellow]Nenhum agente configurado.[/yellow]")
+        return
+
+    table = Table(title="Agentes Configurados", show_lines=True)
+    table.add_column("Nome", style="cyan")
+    table.add_column("Plataforma", style="yellow")
+    table.add_column("Role", style="magenta")
+    table.add_column("Plugins", style="green")
+    table.add_column("Chamáveis", style="dim")
+
+    for name, profile in agents.items():
+        role = profile.get("role", "generalist")
+        plugins = profile.get("plugins", [])
+        callable_list = profile.get("callable_agents", [])
+        plugin_str = ", ".join(plugins) if plugins else "-"
+        callable_str = ", ".join(callable_list) if callable_list else "-"
+
+        table.add_row(name, profile.get("platform", "?"), role, plugin_str, callable_str)
+
+    console.print(table)

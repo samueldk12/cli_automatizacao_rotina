@@ -18,10 +18,16 @@ from rich.panel import Panel
 from rich.text import Text
 
 from myc.agent import (
+    auto_assign_plugins,
+    call_agent,
     create_agent_wizard,
     delete_agent,
     launch_agent,
-    list_agents,
+    link_agent_to_agent,
+    list_agents_detailed,
+    link_plugin_to_agent,
+    unlink_agent_from_agent,
+    unlink_plugin_from_agent,
 )
 from myc.agent_plugins import (
     create_plugin_wizard,
