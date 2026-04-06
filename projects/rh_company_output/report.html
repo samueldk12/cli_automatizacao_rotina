@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RH Company - MYC Report</title>
+<style>
+:root{--bg:#121218;--bg2:#1e1e28;--bg3:#282836;--bd:#3a3a4a;--tx:#e8e8f0;--tx2:#a0a0b8;--tx3:#6a6a7e;--green:#2ec453;--red:#dc3545;--yellow:#ffc107;--blue:#0d6efd;--cyan:#00d2d3;--purple:#a55eea;--orange:#fd7e14;--pink:#e83e8c}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.6}
+.hdr{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);padding:40px 24px;text-align:center;border-bottom:3px solid var(--cyan)}
+.hdr h1{font-size:2.2rem;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hdr .sub{color:var(--tx2);font-size:1.05rem;margin-top:8px}
+.hdr .dt{color:var(--tx3);font-size:.85rem;margin-top:12px}
+.ctn{max-width:1100px;margin:0 auto;padding:24px}
+.sec{background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:24px;margin-bottom:24px}
+.sec h2{font-size:1.4rem;color:var(--cyan);margin-bottom:4px;border-bottom:2px solid var(--bd);padding-bottom:8px}
+.sec .sst{color:var(--tx3);font-size:.9rem;margin-bottom:16px}
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.mc{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:16px;text-align:center}
+.mc .ml{color:var(--tx2);font-size:.85rem;margin-bottom:8px}
+.mc .mv{font-size:1.8rem;font-weight:700}
+.rt{color:var(--tx2);margin-bottom:16px;line-height:1.7}
+.bl{color:var(--tx2);padding-left:24px;margin-bottom:16px}
+.bl li{margin-bottom:6px}
+.tc{overflow-x:auto;margin:16px 0}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--bd)}
+th{background:var(--bg2);color:var(--cyan);font-weight:600;font-size:.85rem}
+td{color:var(--tx2);font-size:.9rem}
+tr:hover td{background:rgba(0,210,211,.05)}
+.cc{margin:16px 0}.cc h4{color:var(--tx);margin-bottom:10px}
+.bar-r{display:flex;align-items:center;margin-bottom:8px}
+.bar-l{width:140px;color:var(--tx2);font-size:.85rem;text-align:right;padding-right:12px}
+.bar-c{flex:1;background:var(--bg2);border-radius:4px;height:24px;overflow:hidden}
+.bar{height:100%;border-radius:4px}
+.bar-v{width:60px;text-align:right;color:var(--tx3);font-size:.85rem}
+.ft{text-align:center;padding:20px;color:var(--tx3);font-size:.8rem;border-top:1px solid var(--bd)}
+@media print{body{background:#fff;color:#1a1a2e}.sec{border:1px solid #ccc;background:#fff}}
+</style>
+</head>
+<body>
+<div class="hdr">
+<h1>RH Company - MYC Report</h1>
+<div class="sub">Recursos humanos com folha, recrutamento e desenvolvimento</div>
+<div class="dt">MYC RH Company | Gerado em 06/04/2026</div>
+</div>
+<div class="ctn">
+
+<section class="sec">
+<h2>Ferramentas</h2>
+<h3 class="sst">Aplicacoes para gestao de recursos humanos</h3>
+<div class="mg">
+<div class="mc"><div class="ml">Folha de Pagamento</div><div class="mv" style="color:var(--cyan)">folha_pagamento.py</div></div>
+<div class="mc"><div class="ml">Recrutamento Tracker</div><div class="mv" style="color:var(--green)">recrutamento_tracker.py</div></div>
+</div>
+</section>
+
+<section class="sec">
+<h2>Departamentos RH</h2>
+<h3 class="sst">Estrutura do departamento de recursos humanos</h3>
+<div class="tc">
+<table>
+<thead><tr><th>Departamento</th><th>Responsabilidades</th><th>Ferramenta</th></tr></thead>
+<tbody>
+<tr><td>Recrutamento</td><td>Selecao, entrevistas, onboarding</td><td>recrutamento_tracker.py</td></tr>
+<tr><td>Desenvolvimento</td><td>Treinamentos, planos de carreira</td><td>recrutamento_tracker.py</td></tr>
+<tr><td>Cultura</td><td>Engajamento, clima organizacional</td><td>recrutamento_tracker.py</td></tr>
+<tr><td>Folha</td><td>Folha de pagamento, beneficios, encargos</td><td>folha_pagamento.py</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="sec">
+<h2>Folha de Pagamento</h2>
+<h3 class="sst">Encargos e descontos referenciais (2026)</h3>
+<div class="cc">
+<h4>Encargos sobre o Salario</h4>
+<div class="bar-r"><span class="bar-l">INSS</span><div class="bar-c"><div class="bar" style="width:24%;background:var(--cyan)"></div></div><span class="bar-v">7.5%-14%</span></div>
+<div class="bar-r"><span class="bar-l">IRRF</span><div class="bar-c"><div class="bar" style="width:27%;background:var(--red)"></div></div><span class="bar-v">0%-27.5%</span></div>
+<div class="bar-r"><span class="bar-l">FGTS</span><div class="bar-c"><div class="bar" style="width:8%;background:var(--green)"></div></div><span class="bar-v">8%</span></div>
+<div class="bar-r"><span class="bar-l">Vale Transporte</span><div class="bar-c"><div class="bar" style="width:6%;background:var(--yellow)"></div></div><span class="bar-v">6%</span></div>
+<div class="bar-r"><span class="bar-l">Plano Saude</span><div class="bar-c"><div class="bar" style="width:15%;background:var(--purple)"></div></div><span class="bar-v">copart.</span></div>
+</div>
+</section>
+
+<section class="sec">
+<h2>Processo Seletivo</h2>
+<h3 class="sst">Etapas do recrutamento</h3>
+<div class="tc">
+<table>
+<thead><tr><th>Etapa</th><th>Responsavel</th><th>Duracao Media</th></tr></thead>
+<tbody>
+<tr><td>Triagem de CVs</td><td>Recrutador</td><td>2-3 dias</td></tr>
+<tr><td>Entrevista Inicial</td><td>Recrutador</td><td>30 min</td></tr>
+<tr><td>Teste Tecnico</td><td>Gestor da Area</td><td>3-5 dias para resposta</td></tr>
+<tr><td>Entrevista Tecnica</td><td>Gestor da Area</td><td>60 min</td></tr>
+<tr><td>Entrevista RH</td><td>Analista de RH</td><td>30 min</td></tr>
+<tr><td>Proposta e Oferta</td><td>Gestor + RH</td><td>3-5 dias</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+</div>
+<div class="ft"><p>MYC - My Company Assistant | Gerado automaticamente em 06/04/2026</p></div>
+</body>
+</html>
