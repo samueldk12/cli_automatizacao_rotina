@@ -259,9 +259,10 @@ def _generate_company_plugin(bundle_id: str, bundle: dict) -> None:
     for s in specialists_list:
         ctx_lines.append(f"  - {s['name']} (ID: {s['id']})")
 
+    ctx_joined = "\n".join(ctx_lines)
     context_block = f'''
 def COMPANY_CONTEXT():
-    return """{"\n".join(ctx_lines)}"""
+    return """{ctx_joined}"""
 '''
 
     template = f'''"""

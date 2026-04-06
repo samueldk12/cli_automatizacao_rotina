@@ -12,6 +12,7 @@ Plataformas suportadas:
 
 import json
 import os
+import platform
 import subprocess
 import sys
 from datetime import datetime
@@ -99,14 +100,25 @@ def _find_command(name: str, extra_paths: list[str] | None = None) -> str | None
     search_paths = os.environ.get("PATH", "").split(os.pathsep) + KNOWN_NPM_PATHS
     if extra_paths:
         search_paths.extend(extra_paths)
+
+    # Python é Windows nativo — scripts shell (#!/bin/sh) NAO funcionam
+    # via subprocess.Popen. Precisamos de .cmd/.bat/.exe/.ps1
+    is_windows = platform.system() == "Windows"
+
+    # Tenta extensoes Windows nativas primeiro quando em Windows
+    if is_windows:
+        for path in search_paths:
+            candidate = Path(path) / name
+            for ext in (".cmd", ".bat", ".exe", ".ps1"):
+                c = candidate.with_suffix(ext)
+                if c.exists():
+                    return str(c)
+
+    # Tenta sem extensao
     for path in search_paths:
         candidate = Path(path) / name
-        if candidate.exists():
+        if candidate.is_file():
             return str(candidate)
-        for ext in (".cmd", ".bat", ".exe"):
-            c = candidate.with_suffix(ext)
-            if c.exists():
-                return str(c)
     return None
 
 
@@ -552,23 +564,27 @@ def _build_launch_cmd(platform: str,
                        custom_cmd: str | None) -> tuple[list, bool] | None:
     """Retorna (lista de argumentos, shell_bool) ou None."""
     if platform == "openclaude":
+        # Aborda gem direta: setar env vars e chamar claude
+        # (openclaude eh só um wrapper .ps1 com encoding problemático via subprocess)
+        claude_path = _find_command("claude")
+        if claude_path:
+            return (["cmd.exe", "/c", claude_path], False)
+        return None
+    if platform == "codex":
         bin_path = _find_binary(platform)
         if bin_path:
-            use_shell = bin_path.endswith((".cmd", ".bat"))
-            return ([bin_path], use_shell)
-        return (["openclaude"], True)
+            if bin_path.endswith(".ps1"):
+                return (["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", bin_path], False)
+            elif bin_path.endswith((".cmd", ".bat")):
+                return (["cmd.exe", "/c", bin_path], False)
+            return ([bin_path], False)
+        return (["codex"], True)
     if platform == "cursor":
         bin_path = _find_binary(platform)
         return ([bin_path if bin_path else "cursor", "."], False)
     if platform == "vscode_copilot":
         bin_path = _find_binary(platform)
         return ([bin_path if bin_path else "code", "."], False)
-    if platform == "codex":
-        bin_path = _find_binary(platform)
-        if bin_path:
-            use_shell = bin_path.endswith((".cmd", ".bat"))
-            return ([bin_path], use_shell)
-        return (["codex"], True)
     if platform == "custom" and custom_cmd:
         return (custom_cmd, True)
     return None
