@@ -1,37 +1,40 @@
-version: "3.8"
+version: "3.9"
 
 services:
-  # ── Backend ─────────────────────────────────────────────
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    container_name: taskmanager-api
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
+  db:
+    image: postgres:16-alpine
+    container_name: taskmanager_db
     environment:
-      - DATABASE_URL=sqlite:///./taskmanager.db
+      POSTGRES_USER: taskuser
+      POSTGRES_PASSWORD: taskpass123
+      POSTGRES_DB: taskmanager
+    ports:
+      - "5432:5432"
     volumes:
-      - sqlite_data:/app/data
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 15s
-      timeout: 5s
+      test: ["CMD-SHELL", "pg_isready -U taskuser -d taskmanager"]
+      interval: 5s
+      timeout: 3s
       retries: 5
 
-  # ── Frontend ────────────────────────────────────────────
-  frontend:
+  api:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    container_name: taskmanager-ui
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: taskmanager_api
+    environment:
+      DATABASE_URL: postgresql+asyncpg://taskuser:taskpass123@db:5432/taskmanager
+      SECRET_KEY: supersecretkey_change_in_production_2024
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+      REFRESH_TOKEN_EXPIRE_DAYS: "7"
     ports:
-      - "80:80"
+      - "8000:8000"
     depends_on:
-      backend:
+      db:
         condition: service_healthy
+    restart: unless-stopped
 
 volumes:
-  sqlite_data:
+  pgdata:
