@@ -20,6 +20,70 @@ from rich.console import Console
 console = Console()
 
 
+# ─── Fallback quando API falha ───────────────────────────
+
+def _agent_fallback(agent_name: str, agent_role: str, query: str) -> str:
+    """Gera um output basico baseado no papel do agente quando a API falha."""
+    parts = [
+        f"# Relatório: {agent_name}",
+        f"\n**Papel:** {agent_role or 'N/A'}",
+        f"\n**Tarefa:** {query}",
+        "\n## Abordagem",
+        f"Como {agent_name}, a abordagem esperada seria:",
+        "",
+    ]
+
+    if any(w in agent_role.lower() for w in ["analytics", "dados", "data"]):
+        parts.extend([
+            "1. Coletar métricas do site (tráfego, conversões, bounce rate)",
+            "2. Analisar comportamento do usuário com ferramentas como Google Analytics",
+            "3. Cruzar dados com benchmarks de mercado",
+            "4. Gerar dashboard com KPIs relevantes",
+            "5. Identificar tendências e oportunidades de otimização",
+        ])
+    elif any(w in agent_role.lower() for w in ["seo", "search", "palavra"]):
+        parts.extend([
+            "1. Auditoria técnica do site (PageSpeed, Core Web Vitals)",
+            "2. Pesquisa de palavras-chave relevantes para o nicho",
+            "3. Análise de backlinks e autoridade de domínio",
+            "4. Análise de concorrentes no ranking orgânico",
+            "5. Plano de otimização on-page e link building",
+        ])
+    elif any(w in agent_role.lower() for w in ["social", "instagram", "tiktok"]):
+        parts.extend([
+            "1. Definir calendários editoriais mensais",
+            "2. Criar estratégia de conteúdo por plataforma",
+            "3. Planejar campanhas de engajamento",
+            "4. Analisar métricas de redes sociais",
+            "5. Identificar influencers e parcerias potenciais",
+        ])
+    elif any(w in agent_role.lower() for w in ["copy", "texto", "conteudo"]):
+        parts.extend([
+            "1. Pesquisar público-alvo e tom de voz da marca",
+            "2. Criar copies para anúncios usando framework AIDA",
+            "3. Desenvolver textos para landing pages",
+            "4. Produzir artigos de blog com SEO otimizado",
+            "5. Elaborar emails marketing com alto CTR",
+        ])
+    elif any(w in agent_role.lower() for w in ["gerente", "manager", "coordena"]):
+        parts.extend([
+            "1. Consolidar briefing da tarefa",
+            "2. Delegar responsabilidades por departamento",
+            "3. Definir prazos e dependências",
+            "4. Acompanhar execução e remover blockers",
+            "5. Gerar relatório final com recomendações",
+        ])
+    else:
+        parts.extend([
+            "1. Analisar requisitos da tarefa",
+            "2. Executar análise do contexto fornecido",
+            "3. Produzir deliverables específicos do departamento",
+            "4. Documentar insights e recomendações",
+        ])
+
+    return "\n".join(parts)
+
+
 def _get_default_agent() -> dict | None:
     """Pega o agente default para execucao."""
     from myc.agent import _load_agents
@@ -263,6 +327,16 @@ def execute_plan(plan: dict, company_id: str | None = None,
 
                 result = _dispatch_agent(sp_context, sp_query, company_id, dept_name, sp_id)
 
+                # Se foi um erro (rate limit esgotado), tenta fallback
+                if result.get("status") == "failed" and result.get("error"):
+                    console.print(f"  [yellow]Usando fallback para '{sp_name}'[/yellow]")
+                    fallback = _agent_fallback(sp_name, sp_role, query)
+                    if fallback:
+                        if company_id:
+                            from myc.company_memory import save as mem_save
+                            mem_save(company_id, f"{dept_name}_{sp_id}_fallback", fallback, dept=dept_name, source=sp_id)
+                        result = {"status": "completed_fallback", "exit_code": 0, "output": fallback}
+
                 phase_report["agents"].append({
                     "id": sp_id,
                     "name": sp_name,
@@ -349,10 +423,10 @@ def _call_llm_api(
     }
 
     # Retry com backoff exponencial para 429 / 5xx
-    max_retries = 4
+    max_retries = 5
     for attempt in range(max_retries):
         if attempt > 0:
-            wait = min(10 * (2 ** (attempt - 1)), 30)
+            wait = min(30 * (2 ** (attempt - 1)), 120)
             console.print(f"  [yellow]Rate limit. Aguardando {wait}s... (tentativa {attempt+1}/{max_retries})[/yellow]")
             time.sleep(wait)
 
