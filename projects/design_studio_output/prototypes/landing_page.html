@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaTech — Engineering the future, shipping today.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;color:#1F2937;background:#fff;line-height:1.6;-webkit-font-smoothing:antialiased}
+    a{text-decoration:none;color:inherit}.img{max-width:100%;display:block}
+    .navbar{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border-bottom:1px solid #E5E7EB;padding:0 2rem}
+    .navbar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+    .logo{display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:1.25rem}
+    .logo-mark{width:32px;height:32px;background:linear-gradient(135deg,#4F6FFF,#5674D6);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.85rem}
+    .nav-links{display:flex;gap:2rem;list-style:none}
+    .nav-links a{font-size:.9rem;font-weight:500;color:#4B5563;transition:color .2s}.nav-links a:hover{color:#111827}
+    .nav-cta{display:flex;gap:.75rem;align-items:center}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border-radius:6px;font-weight:600;font-size:.875rem;cursor:pointer;border:none;padding:.5rem 1.1rem;transition:all .2s;text-decoration:none}.btn--ghost{background:transparent;color:#374151}.btn--ghost:hover{background:#F3F4F6}
+    .btn--primary{background:#4F6FFF;color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05)}.btn--primary:hover{background:#3B57DB;transform:translateY(-1px)}
+    .btn--lg{padding:.75rem 1.75rem;font-size:1rem;border-radius:8px}
+    .btn--white{background:#fff;color:#4F6FFF}
+    .btn--outlined{background:transparent;color:#4F6FFF;border:1px solid #E5E7EB}.btn--outlined:hover{background:#F9FAFB}
+
+    /* Hero */
+    .hero{padding:8rem 2rem 4rem;text-align:center;background:linear-gradient(135deg,#4F6FFF 0%,#5674D6 40%,#3B57DB 100%);position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.12) 0%,transparent 60%)}
+    .hero-content{max-width:780px;margin:0 auto;position:relative;z-index:1}
+    .hero-badge{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.15);backdrop-filter:blur(4px);padding:.35rem 1rem;border-radius:9999px;font-size:.8rem;font-weight:600;color:rgba(255,255,255,.95);margin-bottom:1.5rem;border:1px solid rgba(255,255,255,.2)}
+    .hero-badge-dot{width:6px;height:6px;background:#34D399;border-radius:50%;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4rem);font-weight:700;color:#fff;line-height:1.15;margin-bottom:1.25rem}
+    .hero p{font-size:clamp(1rem,2vw,1.2rem);color:rgba(255,255,255,.85);max-width:560px;margin:0 auto 2rem}
+    .hero-buttons{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+
+    .hero-graphic{max-width:860px;margin:3rem auto 0;position:relative;z-index:1;border-radius:12px;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,.25)}
+    .hero-graphic-bar{background:#1F2937;padding:.5rem 1rem;display:flex;gap:.4rem;align-items:center}
+    .dot-r{width:10px;height:10px;border-radius:50%}.dot-r:nth-child(1){background:#EF4444}.dot-r:nth-child(2){background:#F59E0B}.dot-r:nth-child(3){background:#10B981}
+    .hero-graphic-url{margin-left:1rem;background:#374151;padding:.25rem 1rem;border-radius:6px;font-size:.75rem;color:#9CA3AF;font-family:'JetBrains Mono',monospace;flex:1}
+    .hero-graphic-body{background:#0F172A;padding:2rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:2.2}
+    .ck{color:#C084FC}.cf{color:#60A5FA}.cs{color:#34D399}.cc{color:#6B7280}.co{color:#F9FAFB}
+
+    /* Stats */
+    .section{padding:5rem 2rem}
+    .stats-section{background:#F9FAFB;border-top:1px solid #E5E7EB;border-bottom:1px solid #E5E7EB}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:2rem;max-width:900px;margin:0 auto;text-align:center}
+    .stat-number{font-size:2.5rem;font-weight:800;color:#4F6FFF}
+    .stat-label{font-size:.9rem;color:#6B7280;margin-top:.25rem}
+
+    /* Features */
+    .section-header{text-align:center;max-width:600px;margin:0 auto 3rem}
+    .section-label{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#4F6FFF;margin-bottom:.75rem}
+    .section-title{font-size:clamp(1.75rem,4vw,2.25rem);font-weight:700;color:#111827;line-height:1.2;margin-bottom:.75rem}
+    .section-desc{color:#6B7280;font-size:1.05rem}
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;max-width:1100px;margin:0 auto}
+    .feature-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:1.75rem;transition:all .3s}
+    .feature-card:hover{box-shadow:0 10px 15px -3px rgba(0,0,0,.1);transform:translateY(-4px)}
+    .feature-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;font-size:1.3rem}
+    .fi-blue{background:#EDF2FF;color:#4F6FFF}.fi-green{background:#ECFDF5;color:#10B981}.fi-orange{background:#FFF3ED;color:#FF6B35}.fi-violet{background:#F0F4FD;color:#5674D6}
+    .feature-card h3{font-size:1.1rem;font-weight:700;color:#111827;margin-bottom:.5rem}
+    .feature-card p{color:#6B7280;font-size:.95rem}
+
+    /* Pricing */
+    .pricing-toggle{display:flex;align-items:center;justify-content:center;gap:.75rem;margin-bottom:2.5rem}
+    .pricing-toggle span{font-size:.9rem;font-weight:500;color:#4B5563}
+    .pricing-toggle .active{color:#111827;font-weight:600}
+    .toggle{width:48px;height:26px;background:#D1D5DB;border-radius:13px;position:relative;cursor:pointer}
+    .toggle::after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s}
+    .toggle.active{background:#4F6FFF}
+    .toggle.active::after{transform:translateX(22px)}
+    .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;max-width:1000px;margin:0 auto;align-items:start}
+    .pricing-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:2rem;transition:all .3s}
+    .pricing-card:hover{box-shadow:0 10px 25px #1112222;transform:translateY(-2px)}
+    .pricing-card--featured{border:2px solid #4F6FFF;position:relative;box-shadow:0 4px 6px -1px rgba(0,0,0,.1)}
+    .pricing-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#4F6FFF;color:#fff;padding:.2rem .8rem;border-radius:9999px;font-size:.7rem;font-weight:700;text-transform:uppercase}
+    .pricing-name{font-size:1rem;font-weight:600;color:#374151}
+    .pricing-price{font-size:2.5rem;font-weight:800;color:#111827;margin:.5rem 0 .25rem}
+    .pricing-price span{font-size:1rem;font-weight:400;color:#6B7280}
+    .pricing-desc{font-size:.85rem;color:#6B7280;margin-bottom:1.5rem}
+    .pricing-features{list-style:none;margin-bottom:1.5rem}
+    .pricing-features li{display:flex;align-items:center;gap:.5rem;font-size:.9rem;color:#4B5563;padding:.35rem 0}
+    .pricing-features li::before{content:'✓';color:#10B981;font-weight:700;font-size:.85rem;width:18px;text-align:center;flex-shrink:0}
+    .pricing-card .btn{width:100%}
+
+    /* Testimonials */
+    .testimonials{background:#F9FAFB}
+    .testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1.5rem;max-width:1100px;margin:0 auto}
+    .testimonial{background:#fff;border-radius:12px;padding:1.75rem;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #F3F4F6}
+    .testimonial-stars{color:#F59E0B;font-size:.9rem;letter-spacing:2px;margin-bottom:.75rem}
+    .testimonial-text{font-size:.95rem;color:#374151;line-height:1.65;margin-bottom:1.25rem;font-style:italic}
+    .testimonial-author{display:flex;align-items:center;gap:.75rem}
+    .testimonial-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:#fff}
+    .testimonial-name{font-weight:600;font-size:.9rem;color:#1F2937}
+    .testimonial-role{font-size:.8rem;color:#6B7280}
+
+    /* CTA */
+    .cta-section{background:linear-gradient(135deg,#131E5E 0%,#1A1A2E 50%,#0A0A14 100%);text-align:center;position:relative;overflow:hidden}
+    .cta-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(79,111,255,.2) 0%,transparent 60%)}
+    .cta-content{max-width:600px;margin:0 auto;position:relative;z-index:1}
+    .cta-content h2{font-family:'Playfair Display',serif;font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;color:#fff;margin-bottom:.75rem}
+    .cta-content p{color:rgba(255,255,255,.7);margin-bottom:2rem}
+
+    /* Footer */
+    .footer{background:#0A0A14;color:rgba(255,255,255,.6);padding:3rem 2rem 1.5rem;font-size:.85rem}
+    .footer-grid{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:2rem;max-width:1100px;margin:0 auto 2rem}
+    .footer-brand .logo{color:#fff;margin-bottom:.75rem}
+    .footer-brand p{line-height:1.6;max-width:260px}
+    .ft-title{font-weight:600;color:#fff;margin-bottom:.75rem;font-size:.85rem}
+    .footer-col a{display:block;padding:.2rem 0;transition:color .2s}.footer-col a:hover{color:#fff}
+    .footer-bottom{max-width:1100px;margin:0 auto;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+
+    @media(max-width:768px){.nav-links{display:none}.footer-grid{grid-template-columns:1fr 1fr}.hero{padding:6rem 1.25rem 3rem}.section{padding:3rem 1.25rem}}
+  </style>
+</head>
+<body>
+<nav class="navbar"><div class="navbar-inner"><a href="#" class="logo"><span class="logo-mark">N</span>NovaTech</a>
+<ul class="nav-links"><li><a href="#features">Features</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#testimonials">Testimonials</a></li><li><a href="#">Docs</a></li></ul>
+<div class="nav-cta"><a href="#" class="btn btn--ghost">Sign In</a><a href="#" class="btn btn--primary">Start Free</a></div></div></nav>
+
+<section class="hero"><div class="hero-content"><div class="hero-badge"><span class="hero-badge-dot"></span>v4.0 — Now in General Availability</div><h1>Engineering the future, shipping today.</h1><p>A unified cloud platform for teams that build, deploy, and scale. From code to production in minutes, not days.</p><div class="hero-buttons"><a href="#" class="btn btn--white btn--lg">Get Started Free</a><a href="#" class="btn btn--outlined btn--lg" style="border-color:rgba(255,255,255,.3);color:#fff">View Demo</a></div></div>
+<div class="hero-graphic"><div class="hero-graphic-bar"><span class="dot-r"></span><span class="dot-r"></span><span class="dot-r"></span><span class="hero-graphic-url">my-team.novatech.dev</span></div><div class="hero-graphic-body"><span class="cc"># Deploy in seconds</span><br><span class="ck">import</span> <span class="co">{ NovaTech }</span> <span class="ck">from</span> <span class="cs">'@novatech/sdk'</span><br><br><span class="ck">const</span> <span class="co">client = </span><span class="ck">new</span> <span class="cf">NovaTech</span><span class="co">({</span><br>&nbsp;&nbsp;<span class="co">project:</span> <span class="cs">'my-web-app'</span><span class="co">,</span><br>&nbsp;&nbsp;<span class="co">region:</span> <span class="cs">'us-east-1'</span><br><span class="co">})</span><br><br><span class="ck">await</span> <span class="co">client.</span><span class="cf">deploy</span><span class="co">()</span> <span class="cc">// ✓ Deployed in 12s</span></div></div></section>
+
+<section class="stats-section"><div class="section"><div class="stats-grid"><div><div class="stat-number">12,000+</div><div class="stat-label">Active Teams</div></div><div><div class="stat-number">3.2M</div><div class="stat-label">Deployments</div></div><div><div class="stat-number">99.98%</div><div class="stat-label">Uptime SLA</div></div><div><div class="stat-number">50ms</div><div class="stat-label">Avg Response</div></div></div></div></section>
+
+<section id="features" class="section"><div class="section-header"><div class="section-label">Features</div><h2 class="section-title">Everything you need to ship faster</h2><p class="section-desc">Speed without sacrificing reliability.</p></div><div class="features-grid">
+<div class="feature-card"><div class="feature-icon fi-blue">&#9881;</div><h3>Zero-Config Deployments</h3><p>Auto-detecting build tools, containerization, and edge deployment across 40+ regions.</p></div>
+<div class="feature-card"><div class="feature-icon fi-green">&#9889;</div><h3>Instant Scale</h3><p>Automatic horizontal scaling from zero to millions of requests. No warm-up needed.</p></div>
+<div class="feature-card"><div class="feature-icon fi-orange">&#9734;</div><h3>Real-Time Observability</h3><p>Built-in metrics, traces, and logs in one unified dashboard with alerting.</p></div>
+<div class="feature-card"><div class="feature-icon fi-violet">&#128274;</div><h3>Enterprise Security</h3><p>SOC 2, SSO, RBAC, audit logs, and VPC peering out of the box.</p></div>
+</div></section>
+
+<section id="pricing" class="section" style="background:#F9FAFB"><div class="section-header"><div class="section-label">Pricing</div><h2 class="section-title">Simple, transparent pricing</h2><p class="section-desc">Start free. Scale when ready.</p></div>
+<div><div class="pricing-toggle"><span class="active">Monthly</span><div class="toggle active" onclick="this.classList.toggle('active')"></div><span>Annual <span style="color:#10B981;font-weight:600;font-size:.75rem">Save 20%</span></span></div></div>
+<div class="pricing-grid">
+<div class="pricing-card"><div class="pricing-name">Hobby</div><div class="pricing-price">$0 <span>/ month</span></div><div class="pricing-desc">Personal projects.</div><ul class="pricing-features"><li>3 projects</li><li>1GB storage</li><li>100GB bandwidth</li><li>Community support</li></ul><a href="#" class="btn btn--outlined">Get Started</a></div>
+<div class="pricing-card pricing-card--featured"><div class="pricing-badge">Most Popular</div><div class="pricing-name">Pro</div><div class="pricing-price">$29 <span>/ month</span></div><div class="pricing-desc">Growing teams.</div><ul class="pricing-features"><li>Unlimited projects</li><li>100GB storage</li><li>1TB bandwidth</li><li>Priority support</li><li>Custom domains</li><li>Team (up to 10)</li></ul><a href="#" class="btn btn--primary">Start Free Trial</a></div>
+<div class="pricing-card"><div class="pricing-name">Enterprise</div><div class="pricing-price">Custom</div><div class="pricing-desc">Advanced needs.</div><ul class="pricing-features"><li>Everything in Pro</li><li>Unlimited storage</li><li>SSO / SAML</li><li>Dedicated support</li><li>SLA 99.99%</li><li>Custom integrations</li></ul><a href="#" class="btn btn--outlined">Contact Sales</a></div>
+</div></section>
+
+<section id="testimonials" class="section testimonials"><div class="section-header"><div class="section-label">Testimonials</div><h2 class="section-title">Loved by engineering teams</h2></div><div class="testimonials-grid">
+<div class="testimonial"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"We cut our deployment time from 45 minutes to 12 seconds alone saved us two on-call engineers."</p><div class="testimonial-author"><div class="testimonial-avatar" style="background:linear-gradient(135deg,#4F6FFF,#5674D6)">SL</div><div><div class="testimonial-name">Sarah Lin</div><div class="testimonial-role">CTO at Stackline</div></div></div></div>
+<div class="testimonial"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"The DX is unmatched. I onboarded our entire internship cohort in a single afternoon."</p><div class="testimonial-author"><div class="testimonial-avatar" style="background:linear-gradient(135deg,#FF6B35,#DB551E)">MR</div><div><div class="testimonial-name">Marcus Rivera</div><div class="testimonial-role">Engineering Lead at CloudBase</div></div></div></div>
+<div class="testimonial"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"We migrated 40 microservices over a weekend. The CLI is elegant, the error messages are actually useful."</p><div class="testimonial-author"><div class="testimonial-avatar" style="background:linear-gradient(135deg,#10B981,#059669)">AK</div><div><div class="testimonial-name">Aisha Karim</div><div class="testimonial-role">VP Platform at DataForge</div></div></div></div>
+</div></section>
+
+<section class="cta-section section"><div class="cta-content"><h2>Start building on NovaTech today.</h2><p>No credit card required. Free tier forever.</p><div class="hero-buttons"><a href="#" class="btn btn--white btn--lg">Get Started Free</a><a href="#" class="btn btn--outlined btn--lg" style="border-color:rgba(255,255,255,.3);color:#fff">Talk to Sales</a></div></div></section>
+
+<footer class="footer"><div class="footer-grid">
+<div class="footer-brand"><div class="logo"><span class="logo-mark">N</span>NovaTech</div><p>Engineering the future, shipping today.</p></div>
+<div class="footer-col"><div class="ft-title">Product</div><a href="#">Features</a><a href="#">Pricing</a><a href="#">Changelog</a></div>
+<div class="footer-col"><div class="ft-title">Resources</div><a href="#">Documentation</a><a href="#">API</a><a href="#">Blog</a></div>
+<div class="footer-col"><div class="ft-title">Company</div><a href="#">About</a><a href="#">Careers</a><a href="#">Security</a></div>
+</div>
+<div class="footer-bottom"><span>&copy; 2026 NovaTech, Inc.</span></div></footer>
+</body>
+</html>

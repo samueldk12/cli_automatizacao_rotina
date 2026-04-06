@@ -1,0 +1,120 @@
+{
+  "components": {
+    "Button": {
+      "description": "Primary interactive element for user actions",
+      "variants": {
+        "primary": {
+          "background": "--color-primary-500",
+          "text": "--color-white",
+          "border": "1px solid --color-primary-500",
+          "hover": {"background": "--color-primary-600", "shadow": "--shadow-sm"},
+          "active": {"background": "--color-primary-700"},
+          "focus": {"outline": "2px solid --color-primary-300", "outlineOffset": "2px"}
+        },
+        "secondary": {
+          "background": "transparent",
+          "text": "--color-primary-500",
+          "border": "1px solid --color-primary-300",
+          "hover": {"background": "--color-primary-50", "border": "--color-primary-500"},
+          "active": {"background": "--color-primary-100"}
+        },
+        "ghost": {
+          "background": "transparent",
+          "text": "--color-neutral-600",
+          "border": "none",
+          "hover": {"background": "--color-neutral-100"},
+          "active": {"background": "--color-neutral-200"}
+        },
+        "danger": {
+          "background": "--color-error-500",
+          "text": "--color-white",
+          "border": "1px solid --color-error-500",
+          "hover": {"background": "--color-error-600"},
+          "active": {"background": "--color-error-700"}
+        }
+      },
+      "sizes": {
+        "sm": {"padding": "6px 12px", "fontSize": "--font-size-xs", "height": "32px"},
+        "md": {"padding": "8px 16px", "fontSize": "--font-size-sm", "height": "40px"},
+        "lg": {"padding": "12px 24px", "fontSize": "--font-size-base", "height": "48px"}
+      },
+      "states": {
+        "default": {},
+        "hover": {"transition": "--transition-fast", "cursor": "pointer"},
+        "active": {"transform": "scale(0.98)"},
+        "disabled": {"opacity": "0.5", "cursor": "not-allowed", "pointerEvents": "none"},
+        "loading": {"pointerEvents": "none", "opacity": "0.7", "cursor": "wait"}
+      }
+    },
+    "Input": {
+      "base": {
+        "padding": "10px 12px",
+        "fontSize": "--font-size-sm",
+        "border": "1px solid --color-neutral-300",
+        "borderRadius": "--border-radius-md",
+        "backgroundColor": "--color-surface-white",
+        "width": "100%"
+      },
+      "variants": {
+        "default": {},
+        "withIcon": {"paddingLeft": "36px"},
+        "withError": {"borderColor": "--color-error-500"},
+        "withHelperText": {"helperText": {"marginBottom": "4px", "fontSize": "--font-size-xs", "color": "--color-neutral-500"}}
+      },
+      "states": {
+        "focus": {"borderColor": "--color-primary-500", "boxShadow": "0 0 0 3px rgba(79, 111, 255, 0.15)"},
+        "disabled": {"backgroundColor": "--color-neutral-100", "color": "--color-neutral-400"},
+        "error": {"borderColor": "--color-error-500"}
+      }
+    },
+    "Card": {
+      "base": {"borderRadius": "--border-radius-lg", "padding": "24px", "backgroundColor": "--color-surface-white"},
+      "variants": {
+        "default": {"boxShadow": "--shadow-sm", "border": "1px solid --color-neutral-200"},
+        "elevated": {"boxShadow": "--shadow-md", "hover": {"boxShadow": "--shadow-lg"}},
+        "outlined": {"border": "2px solid --color-neutral-200", "boxShadow": "none"},
+        "interactive": {"cursor": "pointer", "hover": {"boxShadow": "--shadow-md", "transform": "translateY(-2px)"}}
+      }
+    },
+    "Modal": {
+      "structure": {
+        "overlay": {"backgroundColor": "rgba(0, 0, 0, 0.5)", "backdropFilter": "blur(4px)", "zIndex": "--z-index-overlay"},
+        "container": {"backgroundColor": "--color-surface-white", "borderRadius": "--border-radius-xl", "boxShadow": "--shadow-xl"},
+        "header": {"padding": "20px 24px 0"},
+        "body": {"padding": "20px 24px"},
+        "footer": {"padding": "0 24px 20px"}
+      },
+      "sizes": {
+        "sm": {"maxWidth": "400px"},
+        "md": {"maxWidth": "520px"},
+        "lg": {"maxWidth": "720px"},
+        "xl": {"maxWidth": "960px"}
+      },
+      "closeBehavior": {"closeButton": true, "escKey": true, "clickOutside": true}
+    },
+    "Badge": {
+      "base": {"borderRadius": "--border-radius-full", "fontSize": "--font-size-xs", "fontWeight": "--font-weight-medium", "padding": "2px 8px"},
+      "variants": {
+        "default": {"backgroundColor": "--color-neutral-100", "color": "--color-neutral-700"},
+        "success": {"backgroundColor": "--color-semantic-success-100", "color": "--color-semantic-success-700"},
+        "warning": {"backgroundColor": "--color-semantic-warning-100", "color": "--color-semantic-warning-700"},
+        "error": {"backgroundColor": "--color-semantic-error-100", "color": "--color-semantic-error-700"},
+        "info": {"backgroundColor": "--color-semantic-info-100", "color": "--color-semantic-info-700"}
+      }
+    },
+    "Avatar": {
+      "base": {"borderRadius": "--border-radius-full", "objectFit": "cover"},
+      "sizes": {
+        "xs": {"width": "24px", "height": "24px"},
+        "sm": {"width": "32px", "height": "32px"},
+        "md": {"width": "40px", "height": "40px"},
+        "lg": {"width": "48px", "height": "48px"},
+        "xl": {"width": "64px", "height": "64px"}
+      }
+    },
+    "Tooltip": {
+      "base": {"backgroundColor": "--color-neutral-900", "color": "--color-white", "padding": "6px 10px", "borderRadius": "--border-radius-md", "fontSize": "--font-size-xs", "maxWidth": "240px", "zIndex": "--z-index-popover"},
+      "behavior": {"delay": {"show": "200ms", "hide": "100ms"}, "trigger": ["hover", "focus"]}
+    }
+  }
+}
