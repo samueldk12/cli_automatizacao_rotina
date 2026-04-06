@@ -988,18 +988,29 @@ def _launch_specialist_query(specialist_id: str, query: str, middleware_ids: lis
 @click.argument("company_name", required=True)
 @click.argument("specialist_arg", required=False, default=None)
 @click.option("-o", "--middleware", "middlewares", multiple=True, help="Aplica middleware(s)")
+@click.option("-a", "--auto", "auto_mode", is_flag=True, help="Executa sem confirmacao interativa")
 @click.argument("command", nargs=-1, required=False)
-def agent_company_cmd(company_name: str, specialist_arg: Optional[str], middlewares: tuple, command: tuple) -> None:
+def agent_company_cmd(company_name: str, specialist_arg: Optional[str], middlewares: tuple, auto_mode: bool, command: tuple) -> None:
     """Lanca empresa com sub-agente especializado.
 
     \b
     Exemplos:
-      myc agent-company dev_agency tech_lead "crie arquitetura microservicos"
-      myc agent-company marketing_agency_company social_strategist "planeje campanha Q4"
-      myc agent-company dev_agency -o prompt_enhancer "refatore API REST"
-      myc agent-company dev_agency  # lista sub-agentes disponiveis
+      myc agent-company dev_agency "crie uma API REST"          # gera planning automatico
+      myc agent-company dev_agency tech_lead "arquitetura"       # specialist especifico (legado)
+      myc agent-company dev_agency --show-plan                 # so mostra o plano
+      myc agent-company dev_agency                             # lista sub-agentes disponiveis
+
+    \b
+    Fluxo moderno:
+      1. Gera planning com departamentos e agentes relevantes
+      2. Mostra fases e dependencias
+      3. Usuario aprova
+      4. Executa cada agente/fase, salvando output na memoria da empresa
     """
-    from myc.agent_plugins import execute_company_profile, list_companies, list_plugins as _list
+    import questionary
+    from myc.agent_plugins import execute_company_profile, list_companies
+    from myc.planner import generate_plan, display_plan, save_plan
+    from myc.executor import execute_plan
 
     available = {c["id"]: c["name"] for c in list_companies()}
     if company_name not in available:
@@ -1007,19 +1018,67 @@ def agent_company_cmd(company_name: str, specialist_arg: Optional[str], middlewa
         console.print(f"Disponiveis: {', '.join(available.keys())}")
         sys.exit(1)
 
-    query = " ".join(command) if command else ""
+    # Carrega specialists validos da empresa
+    from myc.agent_plugins import list_companies as list_cos
+    co_data = None
+    for c in list_cos():
+        if c["id"] == company_name:
+            co_data = c
+            break
+    valid_specialists = set()
+    if co_data:
+        for sp in co_data.get("specialists", []):
+            valid_specialists.add(sp.get("id", ""))
 
-    if specialist_arg is None:
-        # Mostra sub-agentes
+    # Heuristica: se specialist_arg nao e um specialist valido,
+    # trata como inicio da query
+    query = " ".join(command) if command else ""
+    actual_specialist = None
+
+    if specialist_arg is not None and specialist_arg in valid_specialists:
+        actual_specialist = specialist_arg
+    elif specialist_arg is not None:
+        # Nao e specialist valido — faz parte da query
+        query = specialist_arg + (" " + query if query else "").strip()
+
+    # Se sem specialist e sem query → lista sub-agentes
+    if actual_specialist is None and not query:
         context = execute_company_profile(company_name)
         console.print(f"\n[bold]Empresa: {available[company_name]}[/bold]\n")
         console.print(context)
         return
 
+    # Se tem specialist mas sem query → specialist especifico (legado)
+    if actual_specialist is not None and not query:
+        _launch_query_as_agent(
+            f"{company_name}/{actual_specialist}",
+            execute_company_profile(company_name, specialist_id=actual_specialist),
+            actual_specialist,
+        )
+        return
+
+    # Se tem specialist E query → specialist especifico com query
+    if actual_specialist is not None and query:
+        context = execute_company_profile(company_name, specialist_id=actual_specialist)
+        if not context:
+            return
+        _launch_query_as_agent(f"{company_name}/{actual_specialist}", context, query)
+        return
+
+    # Fluxo moderno: company + query → gera planning
+    # Verifica --show-plan flag (se query contem o flag)
+    show_only = False
+    if query and query.startswith("--"):
+        # Pega query real (sem flags)
+        parts = query.split(" ", 1)
+        if "--show-plan" in parts[0] or "--plan" in parts[0]:
+            show_only = True
+            query = parts[1] if len(parts) > 1 else ""
+
     if not query:
-        import questionary
-        query = questionary.text(
-            f"O que '{specialist_arg}' na empresa '{company_name}' deve fazer?",
+        import questionary as q2
+        query = q2.text(
+            f"O que a empresa '{company_name}' deve fazer?",
         ).ask() or ""
         if not query:
             return
@@ -1040,11 +1099,26 @@ def agent_company_cmd(company_name: str, specialist_arg: Optional[str], middlewa
             except Exception as e:
                 console.print(f"[yellow]Middleware '{mw_id}' falhou: {e}[/yellow]")
 
-    context = execute_company_profile(company_name, specialist_id=specialist_arg)
-    if not context:
+    # Gera o plano
+    plan = generate_plan(query, company_id=company_name)
+    display_plan(plan)
+    plan_file = save_plan(plan)
+
+    if show_only:
+        console.print(f"\n[dim]Plano salvo em {plan_file}[/dim]")
         return
 
-    _launch_query_as_agent(f"{company_name}/{specialist_arg}", context, query)
+    # Confirma e executa
+    if auto_mode:
+        do_execute = True
+    else:
+        do_execute = questionary.confirm("Executar este plano?", default=True).ask()
+    if do_execute:
+        from myc.executor import execute_plan
+        report = execute_plan(plan, company_id=company_name, confirmed=auto_mode)
+        console.print(f"\n[dim]Relatorio: {report.get('status', '?')}[/dim]")
+    else:
+        console.print("[yellow]Execucao cancelada. Plano salvo para referencia futura.[/yellow]")
 
 
 # ─── agent: department ─────────────────────────
@@ -1130,12 +1204,39 @@ def agent_department_cmd(department_name: str, middlewares: tuple, company: Opti
             except Exception as e:
                 console.print(f"[yellow]Middleware '{mw_id}' falhou: {e}[/yellow]")
 
+    # Se empresa especificada -> gera planning de empresa
+    if company:
+        import questionary
+        from myc.planner import generate_plan, display_plan, save_plan
+
+        plan = generate_plan(query, company_id=company)
+        display_plan(plan)
+        plan_file = save_plan(plan)
+
+        do_execute = questionary.confirm("Executar este plano?", default=True).ask()
+        if do_execute:
+            from myc.executor import execute_plan
+            report = execute_plan(plan, company_id=company)
+            console.print(f"\n[dim]Relatorio: {report.get('status', '?')}[/dim]")
+        else:
+            console.print("[yellow]Execucao cancelada. Plano salvo.[/yellow]")
+        return
+
+    # Departamento independente
     context = get_department_context(department_name)
     if not context:
         console.print(f"[red]Nao foi possivel carregar contexto do departamento.[/red]")
         return
 
-    _launch_query_as_agent(f"department/{department_name}", context, query)
+    # Mini-plano do departamento
+    from myc.planner import generate_plan, display_plan
+    plan = generate_plan(query, department_id=department_name)
+    display_plan(plan)
+
+    import questionary
+    do_execute = questionary.confirm("Executar?", default=True).ask()
+    if do_execute:
+        _launch_query_as_agent(f"department/{department_name}", context, query)
 
 
 # ─── agent: middleware ─────────────────────────
@@ -1239,3 +1340,590 @@ def _launch_query_as_agent(agent_label: str, context: str, query: str) -> int:
         console.print("\n[yellow]Nenhum agente 'default' configurado.[/yellow]")
         console.print("Configure com: [cyan]myc agent add[/cyan]")
         return 0
+
+
+# ─── custom (configs customizadas) ─────────────────────────────
+
+@main.group(name="custom")
+def custom_cmd() -> None:
+    """Gerencia configuracoes customizadas de rotinas."""
+    pass
+
+
+@custom_cmd.command(name="add")
+def custom_add() -> None:
+    """Cria uma nova configuracao customizada (wizard)."""
+    from myc.custom_config import create_config_wizard
+    create_config_wizard()
+
+
+@custom_cmd.command(name="list")
+def custom_list() -> None:
+    """Lista todas as configuracoes customizadas."""
+    from rich.table import Table
+    from myc.custom_config import list_custom_configs
+
+    configs = list_custom_configs()
+    if not configs:
+        console.print("[yellow]Nenhuma configuracao customizada.[/yellow]")
+        console.print("Use [cyan]myc custom add[/cyan] para criar.")
+        return
+
+    table = Table(title="Configuracoes Customizadas", show_lines=True)
+    table.add_column("ID", style="cyan")
+    table.add_column("Nome", style="yellow")
+    table.add_column("Descricao", style="green")
+    table.add_column("Saida", style="dim")
+    table.add_column("Middlewares", style="magenta")
+    table.add_column("Agente", style="dim")
+
+    for cfg in configs:
+        out = cfg.get("output", {})
+        out_parts = []
+        if out.get("console"):
+            out_parts.append("console")
+        if out.get("file"):
+            out_parts.append("file")
+        if out.get("html_report"):
+            out_parts.append("html")
+        mws = cfg.get("middlewares", [])
+        table.add_row(
+            cfg.get("id", "?"),
+            cfg.get("name", "?"),
+            cfg.get("description", "")[:50],
+            ", ".join(out_parts) or "-",
+            ", ".join(mws) if mws else "-",
+            cfg.get("agent_profile") or "-",
+        )
+
+    console.print(table)
+
+
+@custom_cmd.command(name="delete")
+@click.argument("name")
+def custom_delete(name: str) -> None:
+    """Remove uma configuracao customizada."""
+    import questionary
+    from myc.custom_config import delete_custom_config, get_custom_config
+
+    cfg = get_custom_config(name)
+    if not cfg:
+        console.print(f"[red]Config '{name}' nao encontrado.[/red]")
+        return
+
+    if questionary.confirm(f"Remover config '{name}'?", default=False).ask():
+        if delete_custom_config(name):
+            console.print(f"[green]Config '{name}' removido.[/green]")
+        else:
+            console.print(f"[red]Erro ao remover '{name}'.[/red]")
+
+
+@custom_cmd.command(name="run")
+@click.argument("name")
+@click.argument("routine_ref", required=False, default=None)
+@click.option("--query", "-q", default=None, help="Query direta para o agente")
+def custom_run(name: str, routine_ref: Optional[str], query: Optional[str]) -> None:
+    """Executa uma rotina usando uma config customizada.
+
+    \b
+    Exemplos:
+      myc custom run estudo_rapido
+      myc custom run estudo_rapido estudar:portugues
+      myc custom run estudo_rapido estudar:portugues -q "resumo gramatica"
+      myc custom run estudo_rapido -q "ajuda com pytest"
+    """
+    import sys
+    from pathlib import Path
+    from myc.custom_config import (
+        get_custom_config, get_output_handler, ensure_dirs, record_routine_history
+    )
+    from myc.middleware_runner import MiddlewareRunner, list_all_middlewares
+    from myc.agent import _load_agents
+
+    ensure_dirs()
+    cfg = get_custom_config(name)
+    if not cfg:
+        console.print(f"[red]Config '{name}' nao encontrado.[/red]")
+        console.print("Use [cyan]myc custom list[/cyan] para ver configs disponiveis.")
+        sys.exit(1)
+
+    output = get_output_handler(cfg)
+    agent_name = cfg.get("agent_profile")
+    variables = cfg.get("variables", {})
+    routines = cfg.get("linked_routines", [])
+
+    # Se routine_ref nao passado mas existe uma vinculada, usa a primeira
+    target_routine = routine_ref or (routines[0] if routines else None)
+
+    # Parse routine_ref (formato grupo:subcommand)
+    group = None
+    subcommand = None
+    routine_label = "custom_run"
+    if target_routine:
+        if ":" in target_routine:
+            group, subcommand = target_routine.split(":", 1)
+        else:
+            subcommand = target_routine
+        routine_label = target_routine
+
+    # Inicializa middlewares
+    mw_ids = cfg.get("middlewares", [])
+    mw_runner = MiddlewareRunner(name)
+    mw_runner.load_all()
+
+    # Obtem perfil do agente
+    agent_profile = None
+    agents = _load_agents()
+    if agent_name and agent_name in agents:
+        agent_profile = agents[agent_name]
+
+    # Monta query
+    actual_query = query or f"Execute a rotina '{routine_label}'"
+
+    # Aplica PROMPT_MODIFY
+    final_query = mw_runner.modify_prompt(actual_query)
+
+    # Notifica start
+    mw_runner.notify_start(routine_label, {
+        "config_used": name,
+        "middlewares_used": mw_ids,
+        "variables": variables,
+    })
+
+    # Launche agent
+    if agent_name and agent_name in agents:
+        console.print(f"\n[bold cyan]Lancando agente '{agent_name}' com config '{name}'...[/bold cyan]")
+
+        # Prepara CLAUDE.md com query modificada
+        cwd_val = agent_profile.get("cwd") if agent_profile else None
+        work_dir = Path(cwd_val) if cwd_val else Path.cwd()
+        md_path = work_dir / "CLAUDE.md"
+        backup = None
+        if md_path.exists():
+            backup = md_path.read_text(encoding="utf-8")
+
+        # Adiciona instrucoes de variaveis no prompt
+        full_query_text = final_query
+        if variables:
+            extra_lines = [f"{k}={v}" for k, v in variables.items()]
+            full_query_text += "\n\n[Variaveis de contexto]\n" + "\n".join(extra_lines)
+
+        md_path.write_text(
+            f"# Agent: {name}\n\n## Rotina\n\n{routine_label}\n\n## Query\n\n{full_query_text}",
+            encoding="utf-8",
+        )
+
+        rc = 0
+        try:
+            rc = launch_agent(agent_name, cwd=cwd_val, group=group, subcommand=subcommand)
+        except Exception as e:
+            console.print(f"[red]Erro ao lancar agente: {e}[/red]")
+            mw_runner.handle_error(e)
+            rc = 1
+
+        # Restaura CLAUDE.md
+        if backup is not None:
+            md_path.write_text(backup, encoding="utf-8")
+        elif md_path.exists():
+            md_path.unlink(missing_ok=True)
+
+        duration = mw_runner.notify_end(status="completed" if rc == 0 else "failed")
+        output.write(final_query, label="PROMPT MODIFICADO")
+        record_routine_history(
+            routine_name=routine_label,
+            duration_seconds=duration,
+            status="completed" if rc == 0 else "failed",
+            config_used=name,
+            middlewares_used=mw_ids,
+        )
+
+        if rc != 0:
+            sys.exit(rc)
+    else:
+        # Sem agente configurado — mostra o prompt
+        console.print(f"\n[bold]Config: {name} (query processada)[/bold]\n")
+        console.print(final_query)
+        duration = mw_runner.notify_end(status="no_agent")
+        record_routine_history(
+            routine_name=routine_label,
+            duration_seconds=duration,
+            status="no_agent",
+            config_used=name,
+            middlewares_used=mw_ids,
+        )
+        console.print("\n[yellow]Nenhum agente vinculado a esta config.[/yellow]")
+        console.print("Configure com: [cyan]myc custom add[/cyan]")
+
+
+# ─── middleware (criacao e listagem) ──────────────────────────
+
+@main.group(name="middleware")
+def middleware_cmd() -> None:
+    """Gerencia middlewares (plugins de processamento)."""
+    pass
+
+
+@middleware_cmd.command(name="list")
+def middleware_list() -> None:
+    """Lista todos os middlewares disponiveis."""
+    from rich.table import Table
+    from myc.middleware_runner import list_all_middlewares
+
+    all_mw = list_all_middlewares()
+    if not all_mw:
+        console.print("[yellow]Nenhum middleware encontrado.[/yellow]")
+        console.print("Use [cyan]myc middleware add[/cyan] para criar.")
+        return
+
+    table = Table(title="Middlewares Disponiveis", show_lines=True)
+    table.add_column("ID", style="cyan")
+    table.add_column("Nome", style="yellow")
+    table.add_column("Descricao", style="green")
+    table.add_column("Tipo", style="magenta")
+    table.add_column("Hooks", style="dim")
+
+    for mw in all_mw:
+        mw_dir = mw.get("file", "")
+        is_user = mw_dir.startswith(str(Path.home() / ".myc"))
+        source = "user" if is_user else "built-in"
+
+        # Detecta hooks
+        try:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location(
+                mw["id"], mw.get("file")
+            )
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            hooks = []
+            for h in ("PROMPT_MODIFY", "OUTPUT_MODIFY", "ROUTINE_START", "ROUTINE_END", "ERROR",
+                      "process_prompt", "process_output"):
+                if hasattr(mod, h):
+                    hooks.append(h)
+            hooks_str = ", ".join(hooks) if hooks else "?"
+        except Exception:
+            hooks_str = "?"
+
+        table.add_row(
+            mw["id"],
+            mw["name"],
+            (mw.get("description", "") or "")[:60],
+            mw.get("type", "?") + f" [{source}]",
+            hooks_str,
+        )
+
+    console.print(table)
+
+
+@middleware_cmd.command(name="add")
+def middleware_add() -> None:
+    """Cria um novo middleware (wizard)."""
+    import questionary
+
+    console.print("\n[bold cyan]Criar Middleware[/bold cyan]")
+    console.print("[dim]Crie um plugin de processamento para rotinas e agentes.[/dim]\n")
+
+    mw_id = questionary.text(
+        "ID do middleware (sem espacos, ex: meu_filtro):",
+        validate=lambda x: (len(x) > 0 and " " not in x) or "Sem espacos",
+    ).ask()
+    if not mw_id:
+        return
+
+    mw_name = questionary.text(
+        "Nome display:",
+        default=mw_id.replace("_", " ").title(),
+    ).ask() or mw_id
+
+    mw_desc = questionary.text("Descricao:").ask() or ""
+
+    # Tipo
+    type_choices = [
+        questionary.Choice("prompt_modifier — Modifica o prompt antes de enviar", value="prompt_modifier"),
+        questionary.Choice("output_modifier — Modifica a saida depois da execucao", value="output_modifier"),
+        questionary.Choice("routine — Hooks de rotina (start/end/error)", value="routine"),
+        questionary.Choice("both — Modifica prompt E saida", value="both"),
+    ]
+    mw_type = questionary.select("Tipo do middleware:", choices=type_choices).ask()
+    if not mw_type:
+        return
+
+    # Quando roda
+    when = questionary.select(
+        "Quando executar:",
+        choices=[
+            questionary.Choice("pre — Antes do agente", value="pre"),
+            questionary.Choice("post — Depois do agente", value="post"),
+            questionary.Choice("both — Ambos", value="both"),
+            questionary.Choice("end — So no final da rotina", value="end"),
+        ],
+    ).ask() or "pre"
+
+    # Template baseado no tipo
+    if mw_type == "routine":
+        template = f'''"""
+{mw_name} — {mw_desc}
+
+Tipo: middleware de rotina
+Hooks: ROUTINE_START, ROUTINE_END, ERROR
+"""
+
+NAME = "{mw_name}"
+DESCRIPTION = "{mw_desc}"
+MIDDLEWARE_TYPE = "routine"
+RUNS_WHEN = "end"
+
+
+def ROUTINE_START(routine_name: str, context: dict) -> None:
+    """Chamado ao iniciar a rotina."""
+    print(f"[*] {routine_name} iniciou")
+
+
+def ROUTINE_END(routine_name: str, context: dict) -> None:
+    """Chamado ao finalizar a rotina."""
+    duration = context.get("duration_seconds", 0)
+    status = context.get("status", "?")
+    print(f"[*] {routine_name} finalizou em {{duration:.1f}}s ({{status}})")
+
+
+def ERROR(context: dict) -> None:
+    """Chamado quando ocorre erro."""
+    print(f"[ERRO] {{context.get('error_type', '?')}}: {{context.get('error', '?')}}")
+'''
+    elif mw_type == "prompt_modifier":
+        template = f'''"""
+{mw_name} — {mw_desc}
+
+Tipo: modificador de prompt
+"""
+
+NAME = "{mw_name}"
+DESCRIPTION = "{mw_desc}"
+MIDDLEWARE_TYPE = "prompt_modifier"
+RUNS_WHEN = "pre"
+
+
+def PROMPT_MODIFY(prompt: str, profile: dict) -> str:
+    """Modifica o prompt antes de enviar ao agente."""
+    # Sua logica aqui
+    return prompt
+'''
+    elif mw_type == "output_modifier":
+        template = f'''"""
+{mw_name} — {mw_desc}
+
+Tipo: modificador de saida
+"""
+
+NAME = "{mw_name}"
+DESCRIPTION = "{mw_desc}"
+MIDDLEWARE_TYPE = "output_modifier"
+RUNS_WHEN = "post"
+
+
+def OUTPUT_MODIFY(output: str, profile: dict) -> str:
+    """Modifica a saida do agente."""
+    # Sua logica aqui
+    return output
+'''
+    else:  # both
+        template = f'''"""
+{mw_name} — {mw_desc}
+
+Tipo: modificador de prompt e saida
+"""
+
+NAME = "{mw_name}"
+DESCRIPTION = "{mw_desc}"
+MIDDLEWARE_TYPE = "both"
+RUNS_WHEN = "both"
+
+
+def PROMPT_MODIFY(prompt: str, profile: dict) -> str:
+    """Modifica o prompt antes de enviar ao agente."""
+    # Sua logica aqui
+    return prompt
+
+
+def OUTPUT_MODIFY(output: str, profile: dict) -> str:
+    """Modifica a saida do agente."""
+    # Sua logica aqui
+    return output
+'''
+
+    # Salva
+    MW_USER_DIR = Path.home() / ".myc" / "agents" / "middlewares"
+    MW_USER_DIR.mkdir(parents=True, exist_ok=True)
+    target = MW_USER_DIR / f"{mw_id}.py"
+    target.write_text(template, encoding="utf-8")
+
+    console.print(f"\n[green]Middleware criado em {target}[/green]")
+    console.print(f"[dim]Use este middleware em configs customizadas ou com -o {mw_id}[/dim]")
+
+
+# ─── auto (roteador automatico) ──────────────────────────
+
+@main.command(name="auto")
+@click.argument("query", nargs=-1, required=True)
+def auto_cmd(query: tuple) -> None:
+    """Analisa a intencao e roteia automaticamente para o agente certo.
+
+    \b
+    Exemplos:
+      myc auto "crie uma API REST com autenticacao JWT"
+      myc auto "escreva artigo sobre inteligencia artificial"
+      myc auto "crie estrategia de marketing digital para instagram"
+    """
+    from myc.agent_router import auto_route
+
+    query_str = " ".join(query)
+    rc = auto_route(query_str)
+    if rc and rc > 0:
+        sys.exit(rc)
+
+
+@main.command(name="auto-show")
+@click.argument("query", nargs=-1, required=True)
+def auto_show_cmd(query: tuple) -> None:
+    """Mostra apenas a analise de intencao sem lancar o agente.
+
+    \b
+    Exemplo:
+      myc auto-show "desenvolver um app de delivery"
+    """
+    from myc.agent_router import suggest_agents
+
+    query_str = " ".join(query)
+    result = suggest_agents(query_str)
+
+    console.print(f"\n[bold cyan]Analise de Intencao[/bold cyan]")
+    console.print(f"[dim]Query: {query_str}[/dim]\n")
+
+    console.print("[bold]Roles detectados:[/bold]")
+    for role, score in result.get("active_roles", {}).items():
+        if score > 1:
+            bar = "#" * max(1, int(score / 3))
+            console.print(f"  [cyan]{role}[/cyan]: {score:.0f}% {bar}")
+    console.print(f"\n[bold]Top role:[/bold] [yellow]{result.get('top_role', '?')}[/yellow] ({result.get('top_score', 0):.0f}%)")
+
+    agent = result.get("existing_agent")
+    if agent:
+        console.print(f"[bold]Agente existente:[/bold] [green]{agent}[/green]")
+    else:
+        console.print(f"[yellow]Nenhum agente para role '{result.get('top_role')}'.[/yellow]")
+
+    bundles = result.get("suggested_bundles", [])
+    if bundles:
+        console.print(f"\n[bold]Bundles recomendados:[/bold]")
+        for b in bundles:
+            console.print(f"  [green]{b['name']}[/green] — score: {b['score']}")
+
+
+@main.command(name="auto-history")
+@click.option("--limit", "-n", default=20, help="Numero de entradas")
+def auto_history_cmd(limit: int) -> None:
+    """Mostra historico de decisoes do roteador automatico."""
+    from myc.agent_router import show_router_history
+    show_router_history(limit=limit)
+
+
+# ─── company-memory ────────────────────────────────────────
+
+@main.group(name="company-memory")
+def company_memory_cmd() -> None:
+    """Gerencia memoria compartilhada entre agentes de uma empresa."""
+    pass
+
+
+@company_memory_cmd.command(name="list")
+@click.argument("company_id")
+def cm_list(company_id: str) -> None:
+    """Lista todos os itens de memoria de uma empresa."""
+    from myc.company_memory import show_memory_table
+    show_memory_table(company_id)
+
+
+@company_memory_cmd.command(name="get")
+@click.argument("company_id")
+@click.argument("key")
+def cm_get(company_id: str, key: str) -> None:
+    """Recupera um item de memoria pelo key."""
+    import json
+    from myc.company_memory import get_full
+
+    data = get_full(company_id, key)
+    if not data:
+        console.print(f"[red]Key '{key}' nao encontrada em '{company_id}'.[/red]")
+        return
+
+    console.print(f"[bold]Key:[/bold] {key}")
+    console.print(f"[bold]Empresa:[/bold] {company_id}")
+    console.print(f"[bold]Departamento:[/bold] {data.get('department', '-')}")
+    console.print(f"[bold]Criado:[/bold] {data.get('created_at', '-')}")
+    if data.get('shared_with'):
+        console.print(f"[bold]Compartilhado:[/bold] {', '.join(data['shared_with'])}")
+
+    val = data.get("value")
+    if isinstance(val, (dict, list)):
+        console.print(f"\n[bold]Valor:[/bold]")
+        import json
+        console.print(json.dumps(val, indent=2, ensure_ascii=False))
+    else:
+        console.print(f"\n[bold]Valor:[/bold] {val}")
+
+
+@company_memory_cmd.command(name="delete")
+@click.argument("company_id")
+@click.argument("key")
+def cm_delete(company_id: str, key: str) -> None:
+    """Apaga um item de memoria."""
+    import questionary
+
+    if questionary.confirm(f"Apagar key '{key}' de '{company_id}'?", default=False).ask():
+        from myc.company_memory import delete
+        if delete(company_id, key):
+            console.print(f"[green]Key '{key}' apagada.[/green]")
+        else:
+            console.print(f"[red]Key nao encontrada.[/red]")
+
+
+@company_memory_cmd.command(name="share")
+@click.argument("company_id")
+@click.argument("key")
+@click.argument("to_dept")
+def cm_share(company_id: str, key: str, to_dept: str) -> None:
+    """Compartilha um item de memoria com outro departamento."""
+    from myc.company_memory import share
+
+    if share(company_id, key, to_dept):
+        console.print(f"[green]Key '{key}' compartilhada com '{to_dept}'.[/green]")
+    else:
+        console.print(f"[red]Key nao encontrada ou erro ao compartilhar.[/red]")
+
+
+# ─── plan ────────────────────────────────────────────────────
+
+@main.command(name="plan")
+@click.argument("company_or_dept")
+@click.argument("query", nargs=-1, required=True)
+@click.option("-c", "--company", default=None, help="Especificamente empresa")
+@click.option("-d", "--dept", default=None, help="Especificamente departamento")
+def plan_cmd(company_or_dept: str, query: tuple, company: Optional[str], dept: Optional[str]) -> None:
+    """Gera e mostra planning de uma empresa ou departamento sem executar.
+
+    \b
+    Exemplos:
+      myc plan dev_agency "crie API REST com autenticacao"
+      myc plan marketing "crie campanha para copa" -c marketing_agency
+      myc plan marketing "campanha de natal" -d marketing -c marketing_agency
+    """
+    from myc.planner import generate_plan, display_plan, save_plan
+
+    query_str = " ".join(query)
+    company_id = company
+    dept_id = dept
+
+    plan = generate_plan(query_str, company_id=company_id, department_id=dept_id)
+    display_plan(plan)
+    plan_file = save_plan(plan)
+    console.print(f"\n[dim]Plano salvo em {plan_file}[/dim]")
