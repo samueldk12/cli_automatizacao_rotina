@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestora de Investimentos - MYC Report</title>
+<style>
+:root{--bg:#121218;--bg2:#1e1e28;--bg3:#282836;--bd:#3a3a4a;--tx:#e8e8f0;--tx2:#a0a0b8;--tx3:#6a6a7e;--green:#2ec453;--red:#dc3545;--yellow:#ffc107;--blue:#0d6efd;--cyan:#00d2d3;--purple:#a55eea;--orange:#fd7e14;--pink:#e83e8c}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.6}
+.hdr{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);padding:40px 24px;text-align:center;border-bottom:3px solid var(--cyan)}
+.hdr h1{font-size:2.2rem;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hdr .sub{color:var(--tx2);font-size:1.05rem;margin-top:8px}
+.hdr .dt{color:var(--tx3);font-size:.85rem;margin-top:12px}
+.ctn{max-width:1100px;margin:0 auto;padding:24px}
+.sec{background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:24px;margin-bottom:24px}
+.sec h2{font-size:1.4rem;color:var(--cyan);margin-bottom:4px;border-bottom:2px solid var(--bd);padding-bottom:8px}
+.sec .sst{color:var(--tx3);font-size:.9rem;margin-bottom:16px}
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.mc{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:16px;text-align:center}
+.mc .ml{color:var(--tx2);font-size:.85rem;margin-bottom:8px}
+.mc .mv{font-size:1.8rem;font-weight:700}
+.rt{color:var(--tx2);margin-bottom:16px;line-height:1.7}
+.bl{color:var(--tx2);padding-left:24px;margin-bottom:16px}
+.bl li{margin-bottom:6px}
+.tc{overflow-x:auto;margin:16px 0}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--bd)}
+th{background:var(--bg2);color:var(--cyan);font-weight:600;font-size:.85rem}
+td{color:var(--tx2);font-size:.9rem}
+tr:hover td{background:rgba(0,210,211,.05)}
+.cc{margin:16px 0}.cc h4{color:var(--tx);margin-bottom:10px}
+.bar-r{display:flex;align-items:center;margin-bottom:8px}
+.bar-l{width:140px;color:var(--tx2);font-size:.85rem;text-align:right;padding-right:12px}
+.bar-c{flex:1;background:var(--bg2);border-radius:4px;height:24px;overflow:hidden}
+.bar{height:100%;border-radius:4px}
+.bar-v{width:60px;text-align:right;color:var(--tx3);font-size:.85rem}
+.ft{text-align:center;padding:20px;color:var(--tx3);font-size:.8rem;border-top:1px solid var(--bd)}
+@media print{body{background:#fff;color:#1a1a2e}.sec{border:1px solid #ccc;background:#fff}}
+</style>
+</head>
+<body>
+<div class="hdr">
+<h1>Gestora de Investimentos - MYC Report</h1>
+<div class="sub">Analise de mercado, carteiras, riscos e assessoria financeira</div>
+<div class="dt">MYC Investimentos | Gerado em 06/04/2026</div>
+</div>
+<div class="ctn">
+
+<section class="sec">
+<h2>Ferramentas</h2>
+<h3 class="sst">Calculadoras desenvolvidas para gestao de investimentos</h3>
+<div class="mg">
+<div class="mc"><div class="ml">Analise de Carteira</div><div class="mv" style="color:var(--cyan)">portfolio_analyzer.py</div></div>
+<div class="mc"><div class="ml">Titulos de Renda Fixa</div><div class="mv" style="color:var(--green)">titulo_renda_fixa.py</div></div>
+<div class="mc"><div class="ml">IRPF Investimentos</div><div class="mv" style="color:var(--orange)">irpf_investimentos.py</div></div>
+</div>
+</section>
+
+<section class="sec">
+<h2>Departamentos</h2>
+<h3 class="sst">Estrutura organizacional da gestora</h3>
+<div class="tc">
+<table>
+<thead><tr><th>Departamento</th><th>Responsabilidades</th><th>Ferramenta</th></tr></thead>
+<tbody>
+<tr><td>Analise de Mercado</td><td>Pesquisa macroeconomica, setores, ativos</td><td>portfolio_analyzer.py</td></tr>
+<tr><td>Gestao de Carteiras</td><td>Alocacao, rebalanceamento, performance</td><td>portfolio_analyzer.py</td></tr>
+<tr><td>Risk & Compliance</td><td>Conformidade CVM, controles de risco</td><td>titulo_renda_fixa.py</td></tr>
+<tr><td>Relacionamento Cliente</td><td>Assessoria, relatorios, atendimento</td><td>irpf_investimentos.py</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="sec">
+<h2>Performance da Carteira</h2>
+<h3 class="sst">Alocacao por classe de ativos (perfil moderado)</h3>
+<div class="cc">
+<h4>Distribuicao de Ativos</h4>
+<div class="bar-r"><span class="bar-l">Renda Fixa</span><div class="bar-c"><div class="bar" style="width:40%;background:var(--cyan)"></div></div><span class="bar-v">40%</span></div>
+<div class="bar-r"><span class="bar-l">Acoes BR</span><div class="bar-c"><div class="bar" style="width:25%;background:var(--green)"></div></div><span class="bar-v">25%</span></div>
+<div class="bar-r"><span class="bar-l">FIIs</span><div class="bar-c"><div class="bar" style="width:15%;background:var(--purple)"></div></div><span class="bar-v">15%</span></div>
+<div class="bar-r"><span class="bar-l">Tesouro Direto</span><div class="bar-c"><div class="bar" style="width:10%;background:var(--yellow)"></div></div><span class="bar-v">10%</span></div>
+<div class="bar-r"><span class="bar-l">Internacional</span><div class="bar-c"><div class="bar" style="width:10%;background:var(--orange)"></div></div><span class="bar-v">10%</span></div>
+</div>
+</section>
+
+<section class="sec">
+<h2>Informacoes Fiscais</h2>
+<h3 class="sst">IRPF sobre investimentos</h3>
+<div class="tc">
+<table>
+<thead><tr><th>Tipo de Aplicacao</th><th>Aliquota IR</th><th>Regra</th></tr></thead>
+<tbody>
+<tr><td>CDB / Tesouro</td><td>15% a 22.5%</td><td>Tabela regressiva (30d a 720d)</td></tr>
+<tr><td>Acoes (swing)</td><td>15%</td><td>Vendas acima de R$ 20.000/mes</td></tr>
+<tr><td>FIIs</td><td>20%</td><td>Sobre dividendos e ganho de capital</td></tr>
+<tr><td>Day Trade (acoes)</td><td>20%</td><td>Sem isencao de R$ 20.000</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+</div>
+<div class="ft"><p>MYC - My Company Assistant | Gerado automaticamente em 06/04/2026</p></div>
+</body>
+</html>
