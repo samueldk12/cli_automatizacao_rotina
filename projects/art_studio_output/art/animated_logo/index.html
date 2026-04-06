@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaTech — Animated Logo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0A0A14;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* Ambient glow behind logo */
+    .ambient {
+      position: absolute;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(79,111,255,0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: ambient-pulse 6s ease-in-out infinite;
+    }
+    @keyframes ambient-pulse {
+      0%,100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .logo-container {
+      position: relative; z-index: 1;
+      cursor: pointer;
+    }
+
+    /* ─── ENTRANCE ANIMATIONS ─── */
+    .hex-ring {
+      opacity: 0;
+      transform: scale(0.3) rotate(-180deg);
+      transform-origin: center;
+      animation: hex-in 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards;
+    }
+    @keyframes hex-in {
+      to { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+
+    .inner-glow {
+      opacity: 0;
+      animation: glow-in 0.8s ease 1s forwards;
+    }
+    @keyframes glow-in {
+      to { opacity: 1; }
+    }
+
+    .text-nova {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: text-up 0.6s ease 1.3s forwards;
+    }
+    @keyframes text-up {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .text-tech {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: text-up 0.6s ease 1.5s forwards;
+    }
+
+    .tagline {
+      opacity: 0;
+      animation: fade-in 0.8s ease 1.8s forwards;
+    }
+    @keyframes fade-in {
+      to { opacity: 1; }
+    }
+
+    .orbit-dot {
+      opacity: 0;
+      animation: dot-appear 0.3s ease 2s forwards;
+    }
+    @keyframes dot-appear {
+      to { opacity: 1; }
+    }
+
+    /* ─── IDLE ANIMATIONS ─── */
+    .hex-ring {
+      animation: hex-in 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards,
+                 hex-breathe 4s ease-in-out 2.5s infinite;
+    }
+    @keyframes hex-breathe {
+      0%,100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.03) rotate(2deg); }
+    }
+
+    .inner-glow {
+      animation: glow-in 0.8s ease 1s forwards,
+                 glow-pulse 3s ease-in-out 2.5s infinite;
+    }
+    @keyframes glow-pulse {
+      0%,100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    .orbit-ring {
+      transform-origin: center;
+      animation: orbit-spin 12s linear 2.5s infinite;
+    }
+    @keyframes orbit-spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    .orbit-ring-reverse {
+      transform-origin: center;
+      animation: orbit-spin-reverse 16s linear 2.5s infinite;
+    }
+    @keyframes orbit-spin-reverse {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(-360deg); }
+    }
+
+    .particle {
+      animation: float 6s ease-in-out infinite;
+    }
+    .particle:nth-child(2) { animation-delay: -2s; animation-duration: 8s; }
+    .particle:nth-child(3) { animation-delay: -4s; animation-duration: 7s; }
+    @keyframes float {
+      0%,100% { transform: translateY(0px); opacity: 0.5; }
+      50% { transform: translateY(-12px); opacity: 1; }
+    }
+
+    /* ─── HOVER STATE ─── */
+    .logo-container:hover .hex-ring {
+      animation: hex-in 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards,
+                 hex-breathe-hover 2s ease-in-out infinite;
+    }
+    @keyframes hex-breathe-hover {
+      0%,100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 20px rgba(79,111,255,0.6)); }
+      50% { transform: scale(1.08) rotate(5deg); filter: drop-shadow(0 0 30px rgba(79,111,255,0.9)); }
+    }
+
+    .logo-container:hover .inner-glow {
+      animation: glow-in 0.8s ease 1s forwards,
+                 glow-pulse-hover 1.5s ease-in-out infinite;
+    }
+    @keyframes glow-pulse-hover {
+      0%,100% { opacity: 0.8; }
+      50% { opacity: 1; filter: drop-shadow(0 0 15px rgba(255,107,53,0.8)); }
+    }
+
+    .logo-container:hover .orbit-ring {
+      animation-duration: 6s;
+    }
+    .logo-container:hover .orbit-ring-reverse {
+      animation-duration: 8s;
+    }
+
+    /* Grid lines in background */
+    .grid-bg {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(79,111,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,111,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: grid-drift 20s linear infinite;
+    }
+    @keyframes grid-drift {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(40px, 40px); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="grid-bg"></div>
+  <div class="ambient"></div>
+
+  <div class="logo-container">
+    <svg width="320" height="400" viewBox="0 0 320 400" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Primary gradient -->
+        <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#4F6FFF"/>
+          <stop offset="100%" stop-color="#5674D6"/>
+        </linearGradient>
+        <!-- Accent gradient -->
+        <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FF6B35"/>
+          <stop offset="100%" stop-color="#FF8B5C"/>
+        </linearGradient>
+        <!-- Glow filter -->
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <filter id="glow-strong">
+          <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- Particles -->
+      <g class="orbit-ring" transform-origin="160 110">
+        <circle class="orbit-dot" cx="260" cy="110" r="2" fill="#4F6FFF" opacity="0.6"/>
+        <circle class="orbit-dot" cx="60" cy="110" r="1.5" fill="#FF6B35" opacity="0.4"/>
+      </g>
+      <g class="orbit-ring-reverse" transform-origin="160 110">
+        <circle class="orbit-dot" cx="160" cy="30" r="1.5" fill="#7A95FF" opacity="0.5"/>
+        <circle class="orbit-dot" cx="160" cy="190" r="2" fill="#34D399" opacity="0.4"/>
+      </g>
+
+      <!-- Outer hexagonal ring -->
+      <g class="hex-ring" filter="url(#glow)">
+        <polygon
+          points="160,20 250,65 250,155 160,200 70,155 70,65"
+          fill="none"
+          stroke="url(#primaryGrad)"
+          stroke-width="2.5"
+        />
+      </g>
+
+      <!-- Inner hexagonal ring -->
+      <g class="hex-ring" filter="url(#glow)" style="animation-delay: 0.5s;">
+        <polygon
+          points="160,45 230,75 230,145 160,175 90,145 90,75"
+          fill="none"
+          stroke="url(#primaryGrad)"
+          stroke-width="1"
+          opacity="0.4"
+        />
+      </g>
+
+      <!-- Geometric "N" cutout -->
+      <g class="inner-glow" filter="url(#glow-strong)">
+        <!-- Left vertical bar -->
+        <rect x="125" y="80" width="14" height="60" rx="2" fill="url(#primaryGrad)"/>
+        <!-- Right vertical bar -->
+        <rect x="181" y="80" width="14" height="60" rx="2" fill="url(#primaryGrad)"/>
+        <!-- Diagonal -->
+        <polygon points="135,80 190,140 175,140 120,80" fill="url(#primaryGrad)"/>
+        <!-- Accent dot at apex -->
+        <circle cx="160" cy="150" r="4" fill="url(#accentGrad)"/>
+      </g>
+
+      <!-- Floating particles -->
+      <g>
+        <circle class="particle" cx="280" cy="80" r="1.5" fill="#4F6FFF" opacity="0.5"/>
+        <circle class="particle" cx="40" cy="140" r="2" fill="#5674D6" opacity="0.4"/>
+        <circle class="particle" cx="260" cy="180" r="1" fill="#FF6B35" opacity="0.3"/>
+      </g>
+
+      <!-- Wordmark: "NOVA" -->
+      <text class="text-nova" x="160" y="260" text-anchor="middle"
+            font-family="'Inter', sans-serif" font-weight="800" font-size="42"
+            fill="white" letter-spacing="8">
+        NOVA
+      </text>
+
+      <!-- Wordmark: "TECH" -->
+      <text class="text-tech" x="160" y="298" text-anchor="middle"
+            font-family="'Inter', sans-serif" font-weight="400" font-size="18"
+            fill="rgba(255,255,255,0.5)" letter-spacing="12">
+        TECH
+      </text>
+
+      <!-- Tagline -->
+      <text class="tagline" x="160" y="340" text-anchor="middle"
+            font-family="'Inter', sans-serif" font-weight="400" font-size="10"
+            fill="rgba(255,255,255,0.25)" letter-spacing="4">
+        ENGINEERING THE FUTURE
+      </text>
+
+      <!-- Accent line -->
+      <line class="tagline" x1="100" y1="358" x2="220" y2="358"
+            stroke="url(#accentGrad)" stroke-width="1" opacity="0.4"/>
+    </svg>
+  </div>
+
+</body>
+</html>

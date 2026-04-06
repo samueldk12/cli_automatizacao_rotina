@@ -1,0 +1,97 @@
+{
+  "$schema": "https://artstudio.company/palettes/v1",
+  "generatedBy": "art_studio (art_director)",
+  "date": "2026-04-05",
+  "palettes": [
+    {
+      "name": "Digital Dawn",
+      "colors": ["#FF8B5C", "#FF6B35", "#DB551E", "#3B82F6", "#131E5E", "#0A0A14"],
+      "mood": ["warm", "energetic", "dramatic", "sunset"],
+      "usage": "Hero sections, CTAs, sunset-themed illustrations. High energy and warmth."
+    },
+    {
+      "name": "Oceanic Depths",
+      "colors": ["#047857", "#059669", "#10B981", "#A7F3D0", "#1E2D8A", "#0A0A14"],
+      "mood": ["calm", "natural", "organic", "refreshing"],
+      "usage": "Wellness, nature, and sustainability themes. Cooling and balanced."
+    },
+    {
+      "name": "Neon Noir",
+      "colors": ["#C084FC", "#818CF8", "#60A5FA", "#F472B6", "#1F2937", "#000000"],
+      "mood": ["cyberpunk", "dark", "electric", "futuristic"],
+      "usage": "Night scenes, gaming, tech-noir aesthetics. High contrast on dark."
+    },
+    {
+      "name": "Desert Mirage",
+      "colors": ["#FDE68A", "#FBBF24", "#F59E0B", "#B45309", "#78350F", "#451A03"],
+      "mood": ["warm", "earthy", "nostalgic", "arid"],
+      "usage": "Western, vintage, travel, food. Warm golden tones throughout."
+    },
+    {
+      "name": "Arctic Frost",
+      "colors": ["#DBEAFE", "#BFDBFE", "#60A5FA", "#3B82F6", "#E5E7EB", "#0F172A"],
+      "mood": ["cool", "clean", "minimal", "crisp"],
+      "usage": "Winter themes, medical, clean tech, SaaS products."
+    },
+    {
+      "name": "Cherry Blossom",
+      "colors": ["#FECDD3", "#FDA4AF", "#FB7185", "#E11D48", "#FDF2F8", "#4C0519"],
+      "mood": ["romantic", "delicate", "spring", "feminine"],
+      "usage": "Beauty, fashion, wellness, lifestyle. Soft pinks with deep accents."
+    },
+    {
+      "name": "Forest Canopy",
+      "colors": ["#ECFDF5", "#6EE7B7", "#34D399", "#065E47", "#14532D", "#022C22"],
+      "mood": ["natural", "lush", "vibrant", "grounded"],
+      "usage": "Environmental, organic food, outdoor sports. Rich green gradient."
+    },
+    {
+      "name": "Cosmic Violet",
+      "colors": ["#EDE9FE", "#C4B5FD", "#A78BFA", "#7C3AED", "#4C1D95", "#1E1B4B"],
+      "mood": ["mystical", "space", "luxury", "ethereal"],
+      "usage": "Night sky illustrations, luxury branding, creative portfolios."
+    },
+    {
+      "name": "Industrial Steel",
+      "colors": ["#F9FAFB", "#D1D5DB", "#9CA3AF", "#6B7280", "#374151", "#111827"],
+      "mood": ["industrial", "modern", "neutral", "professional"],
+      "usage": "Architecture, automotive, B2B software. Full grayscale range."
+    },
+    {
+      "name": "Volcanic Core",
+      "colors": ["#FEF2F2", "#FCA5A5", "#EF4444", "#B91C1C", "#450A0A", "#0A0A14"],
+      "mood": ["intense", "dangerous", "passionate", "dramatic"],
+      "usage": "Action themes, warning systems, intense emotional scenes."
+    },
+    {
+      "name": "Aurora Borealis",
+      "colors": ["#34D399", "#60A5FA", "#C084FC", "#F472B6", "#0F172A", "#0A0A14"],
+      "mood": ["magical", "northern", "dreamy", "cosmic"],
+      "usage": "Night scenes, nature photography backdrops, travel to northern regions."
+    },
+    {
+      "name": "Copper & Teal",
+      "colors": ["#9A3412", "#C2410C", "#EA580C", "#0D9488", "#164E63", "#042F2E"],
+      "mood": ["complementary", "bold", "cinematic", "contrast"],
+      "usage": "Film grading, product photography, dramatic portrait work."
+    },
+    {
+      "name": "Peach Fuzz",
+      "colors": ["#FFF7ED", "#FFEDD5", "#FDBA74", "#FB923C", "#F97316", "#C2410C"],
+      "mood": ["warm", "soft", "welcoming", "friendly"],
+      "usage": "Food, hospitality, children's products, comfort goods. Approachable warmth."
+    },
+    {
+      "name": "Midnight Garden",
+      "colors": ["#0F172A", "#1E293B", "#10B981", "#A78BFA", "#F472B6", "#FDE68A"],
+      "mood": ["mysterious", "nocturnal", "botanical", "enchanting"],
+      "usage": "Night garden scenes, mystery illustrations, dark botanical art."
+    },
+    {
+      "name": "Holographic",
+      "colors": ["#60A5FA", "#6EE7B7", "#FDE68A", "#FCA5A5", "#C4B5FD", "#F3F4F6"],
+      "mood": ["iridescent", "trendy", "youthful", "tech"],
+      "usage": "Gen-Z oriented, tech startups, holographic/Iridiscent UI elements."
+    }
+  ]
+}

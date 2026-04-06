@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typography Explorer — 12 Font Pairings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:ital,wght@0,700;1,600&family=Space+Grotesk:wght@400;600;700&family=DM+Sans:wght@400;500;600&family=Outfit:wght@400;600;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@400;500;600;700&family=Lora:ital,wght@0,500;0,700;1,500&family=Plus+Jakarta+Sans:wght@400;600;700&family=Instrument+Serif:ital@0;1&family=Red+Hat+Display:wght@500;700;800&family=Red+Hat+Text:wght@400;500;600&family=Cormorant+Garamond:wght@400;600;700&family=Source+Sans+3:wght@400;500;600&family=Bricolage+Grotesque:wght@400;600;700;800&family=Newsreader:ital,wght@0,500;0,700;1,500&family=Manrope:wght@400;500;600;700;800&family=Alegreya:wght@400;600;700&family=Rubik:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F9FAFB;
+      color: #1F2937;
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .page-header {
+      text-align: center;
+      padding: 4rem 2rem 3rem;
+      background: linear-gradient(135deg, #0A0A14 0%, #131E5E 100%);
+      color: white;
+    }
+    .page-header .label {
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em;
+      color: rgba(255,255,255,0.5); margin-bottom: 1rem; font-weight: 600;
+    }
+    .page-header h1 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-style: italic;
+      margin-bottom: 0.75rem;
+    }
+    .page-header p {
+      color: rgba(255,255,255,0.6); max-width: 500px; margin: 0 auto;
+      font-size: 1rem;
+    }
+
+    /* Grid */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: -2rem auto 3rem;
+      padding: 0 2rem;
+    }
+    .pairing-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border: 1px solid #E5E7EB;
+      transition: box-shadow 0.3s, transform 0.3s;
+    }
+    .pairing-card:hover {
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+
+    /* Card header */
+    .pairing-number {
+      font-size: 0.7rem; color: #9CA3AF; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .pairing-label {
+      display: flex; align-items: baseline; gap: 0.5rem;
+      margin: 0.5rem 0 1rem; padding-bottom: 0.75rem;
+      border-bottom: 1px solid #F3F4F6;
+    }
+    .label-heading {
+      font-size: 1.1rem; font-weight: 700; color: #111827;
+    }
+    .label-body {
+      font-size: 0.85rem; color: #9CA3AF; font-weight: 400;
+    }
+    .label-arrow {
+      color: #D1D5DB; font-size: 0.8rem;
+    }
+    .use-case {
+      font-size: 0.7rem; color: #4F6FFF; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    /* Preview */
+    .preview-heading {
+      font-size: 1.5rem; line-height: 1.25; color: #111827;
+      margin-bottom: 0.25rem;
+    }
+    .preview-body {
+      font-size: 0.95rem; line-height: 1.7; color: #4B5563;
+      margin-bottom: 1rem;
+    }
+    .preview-all-caps {
+      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em;
+      color: #9CA3AF; margin-bottom: 1rem;
+    }
+
+    /* Font tags */
+    .font-tags {
+      display: flex; gap: 0.4rem; flex-wrap: wrap;
+    }
+    .font-tag {
+      font-size: 0.65rem; padding: 0.15rem 0.5rem;
+      border-radius: 9999px; background: #F3F4F6;
+      color: #6B7280; font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+      .gallery { grid-template-columns: 1fr; padding: 0 1.25rem; }
+      .page-header { padding: 3rem 1.25rem 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="label">Art Studio Typography Explorer</div>
+    <h1>The Art of Type</h1>
+    <p>Twelve carefully curated font pairings for your next project. Each pairing includes a heading font, body font, and live preview.</p>
+  </header>
+
+  <main class="gallery">
+
+    <!-- Pairing 1: Modern SaaS -->
+    <article class="pairing-card">
+      <div class="pairing-number">Pairing 01</div>
+      <div class="pairing-label">
+        <span class="label-heading" style="font-family:'Space Grotesk',sans-serif;">Space Grotesk</span>
+        <span class="label-arrow">+</span>
+        <span class="label-body" style="font-family:'DM Sans',sans-serif;">DM Sans</span>
+      </div>
+      <div class="use-case">Ideal for: SaaS landing pages</div>
+      <h2 class="preview-heading" style="font-family:'Space Grotesk',sans-serif;">Ship faster with fewer meetings</h2>
+      <p class="preview-body" style="font-family:'DM Sans',sans-serif;">The best engineering teams have a secret: they communicate less and build more. Async-first workflows reduce context switching by 60%.</p>
+      <div class="preview-all-caps" style="font-family:'Space Grotesk',sans-serif;">Space Grotesk &middot; DM Sans &middot; Geometric Sans + Humanist Sans</div>
+      <div class="font-tags"><span class="font-tag">geometric</span><span class="font-tag">modern</span><span class="font-tag">tech</span></div>
+    </article>
+
+    <!-- Pairing 2: Editorial / Magazine -->
+    <article class="pairing-card">
+      <div class="pairing-number">Pairing 02</div>
+      <div class="pairing-label">
+        <span class="label-heading" style="font-family:'Playfair Display',serif;">Playfair Display</span>
+        <span class="label-arrow">+</span>
+        <span class="label-body" style="font-family:'Inter',sans-serif;">Inter</span>
+      </div>
+      <div class="use-case">Ideal for: Editorial & lifestyle</div>
+      <h2 class="preview-heading" style="font-family:'Playfair Display',serif;">The Architecture of Silence</h2>
+      <p class="preview-body" style="font-family:'Inter',sans-serif;">In a world of constant notification, the most radical act may be turning everything off and simply listening to what remains.</p>
+      <div class="preview-all-caps" style="font-family:'Playfair Display',serif;">Playfair Display &middot; Inter &middot; Display Serif + UI Sans</div>
+      <div class="font-tags"><span class="font-tag">editorial</span><span class="font-tag">elegant</span><span class="font-tag">contrast</span></div>
+    </article>
+
+    <!-- Pairing 3: Bold & Confident -->
+    <article class="pairing-card">
+      <div class="pairing-number">Pairing 03</div>
+      <div class="pairing-label">
+        <span class="label-heading" style="font-family:'Outfit',sans-serif;">Outfit</span>
+        <span class="label-arrow">+</span>
+        <span class="label-body" style="font-family:'Inter',sans-serif;">Inter</span>
+      </div>
+      <div class="use-case">Ideal for: Brand identity systems</div>
+      <h2 class="preview-heading" style="font-family:'Outfit',sans-serif;font-weight:800;">Bold ideas deserve bold type</h2>
+      <p class="preview-body" style="font-family:'Inter',sans-serif;">Typography is 90% of design. Choose well and the rest takes care of itself. Outfit's geometric confidence paired with Inter's clarity.</p>
+      <div class="preview-all-caps" style="font-family:'Outfit',sans-serif;">Outfit &middot; Inter &middot; Geometric Sans + Neutral Sans</div>
+      <div class="font-tags"><span class="font-tag">bold</span><span class="font-tag">versatile</span><span class="font-tag">brand</span></div>
+    </article>
+
+    <!-- Pairing 4: Classic Elegance -->
+    <article class="pairing-card">
+      <div class="pairing-number">Pairing 04</div>
+      <div class="pairing-label">
+        <span class="label-heading" style="font-family:'Libre Baskerville',serif;">Libre Baskerville</span>
+        <span class="label-arrow">+</span>
+        <span class="label-body" style="font-family:'Work Sans',sans-serif;">Work Sans</span>
+      </div>
+      <div class="use-case">Ideal for: Long-form reading</div>
+      <h2 class="preview-heading" style="font-family:'Libre Baskerville',serif;font-style:italic;">On the Nature of Letters</h2>
+      <p class="preview-body" style="font-family:'Work Sans',sans-serif;">Reading on screens is fundamentally different from reading on paper. The right typeface pair bridges both worlds with grace and legibility.</p>
+      <div class="preview-all-caps" style="font-family:'Libre Baskerville',serif;">Libre Baskerville &middot; Work Sans &middot; Transitional Serif + Geometric Sans</div>
+      <div class="font-tags"><span class="font-tag">literary</span><span class="font-tag">classic</span><span class="font-tag">readable</span></div>
+    </article>
+
+    <!-- Pairing 5: Warm & Approachable -->
+    <article class="pairing-card">
+      <div class="pairing-number">Pairing 05</div>
+      <div class="pairing-label">
+        <span class="label-heading" style="font-family:'Plus Jakarta Sans',sans-serif;">Plus Jakarta Sans</span>
+        <span class="label-arrow">+</span>
+        <span class="label-body" style="font-family:'Lora',serif;">Lora</span>
+      </div>
+      <div class="use-case">Ideal for: Blog & personal sites</div>
+      <h2 class="preview-heading" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">Stories worth telling</h2>
+      <p class="preview-body" style="font-family:'Lora',serif;">Every person has a narrative woven into the fabric of their daily choices. The smallest decisions reveal the largest truths.</p>
+      <div class="preview-all-caps" style="font-family:'Plus Jakarta Sans',sans-serif;">Plus Jakarta Sans &middot; Lora &middot; Modern Sans + Slab Serif</div>
+      <div class="font-tags"><span class="font-tag">warm</span><span class="font-tag">friendly</span><span class="font-tag">storytelling</span></div>
+    </article>
+
+    <!-- Pairing 6: Refined Luxury -->
+    <article class="pairing-card">
+      <div class="pairing-number">Pairing 06</div>
+      <div class="pairing-label">
+        <span class="label-heading" style="font-family:'Instrument Serif',serif;">Instrument Serif</span>
+        <span class="label-arrow">+</span>
+        <span class="label-body" style="font-family:'Inter',sans-serif;">Inter</span>
+      </div>
+      <div class="use-case">Ideal for: Luxury & high-end brands</div>
+      <h2 class="preview-heading" style="font-family:'Instrument Serif',serif;font-style:italic;">Less, but better</h2>
+      <p class="preview-body" style="font-family:'Inter',sans-serif;">The pursuit of restraint is the hardest design challenge available. Every curve, every space, every proportion must earn its place.</p>
+      <div class="preview-all-caps" style="font-family:'Instrument Serif',serif;">Instrument Serif &middot; Inter &middot; Display Serif + System Sans</div>
+      <div class="font-tags"><span class="font-tag">luxury</span><span class="font-tag">refined</span><span class="font-tag">editorial</span></div>
+    </article>
+
+    <!-- Pairing 7: Tech & Code -->
+    <article class="pairing-card">
+      <div class="pairing-number">Pairing 07</div>
+      <div class="pairing-label">
+        <span class="label-heading" style="font-family:'JetBrains Mono',monospace;">JetBrains Mono</span>
+        <span class="label-arrow">+</span>
+        <span class="label-body" style="font-family:'Manrope',sans-serif;">Manrope</span>
+      </div>
+      <div class="use-case">Ideal for: Developer tools & docs</div>
+      <h2 class="preview-heading" style="font-family:'JetBrains Mono',monospace;font-weight:600;">Build. Deploy. Repeat.</h2>
+      <p class="preview-body" style="font-family:'Manrope',sans-serif;">A developer tools platform is only as good as its documentation. Clear typography in code examples makes the difference between adoption and abandonment.</p>
+      <div class="preview-all-caps" style="font-family:'JetBrains Mono',monospace;">JetBrains Mono &middot; Manrope &middot; Monospace + Modern Sans</div>
+      <div class="font-tags"><span class="font-tag">code</span><span class="font-tag">technical</span><span class="font-tag">clarity</span></div>
+    </article>
+
+    <!-- Pairing 8: News & Journalism -->
+    <article class="pairing-card">
+      <div class="pairing-number">Pairing 08</div>
+      <div class="pairing-label">
+        <span class="label-heading" style="font-family:'Red Hat Display',sans-serif;">Red Hat Display</span>
+        <span class="label-arrow">+</span>
+        <span class="label-body" style="font-family:'Red Hat Text',sans-serif;">Red Hat Text</span>
+      </div>
+      <div class="use-case">Ideal for: News & media platforms</div>
+      <h2 class="preview-heading" style="font-family:'Red Hat Display',sans-serif;font-weight:800;">Breaking barriers in climate tech</h2>
+      <p class="preview-body" style="font-family:'Red Hat Text',sans-serif;">A new generation of startups is tackling carbon capture at scale with approaches that seemed impossible just five years ago.</p>
+      <div class="preview-all-caps" style="font-family:'Red Hat Display',sans-serif;">Red Hat Display &middot; Red Hat Text &middot; Sans Family Pairing</div>
+      <div class="font-tags"><span class="font-tag">journalism</span><span class="font-tag">impactful</span><span class="font-tag">family</span></div>
+    </article>
+
+    <!-- Pairing 9: Fashion & Arts -->
+    <article class="pairing-card">
+      <div class="pairing-number">Pairing 09</div>
+      <div class="pairing-label">
+        <span class="label-heading" style="font-family:'Cormorant Garamond',serif;">Cormorant Garamond</span>
+        <span class="label-arrow">+</span>
+        <span class="label-body" style="font-family:'Source Sans 3',sans-serif;">Source Sans 3</span>
+      </div>
+      <div class="use-case">Ideal for: Fashion & arts</div>
+      <h2 class="preview-heading" style="font-family:'Cormorant Garamond',serif;font-weight:700;">Elegance is not excess</h2>
+      <p class="preview-body" style="font-family:'Source Sans 3',sans-serif;">The finest fashion houses understand that typography is the invisible architecture of every brand touchpoint, from the runway invitation to the shopping bag.</p>
+      <div class="preview-all-caps" style="font-family:'Cormorant Garamond',serif;">Cormorant Garamond &middot; Source Sans 3 &middot; Elegant Serif + Humanist Sans</div>
+      <div class="font-tags"><span class="font-tag">fashion</span><span class="font-tag">delicate</span><span class="font-tag">artistic</span></div>
+    </article>
+
+    <!-- Pairing 10: Playful & Quirky -->
+    <article class="pairing-card">
+      <div class="pairing-number">Pairing 10</div>
+      <div class="pairing-label">
+        <span class="label-heading" style="font-family:'Bricolage Grotesque',sans-serif;">Bricolage Grotesque</span>
+        <span class="label-arrow">+</span>
+        <span class="label-body" style="font-family:'Newsreader',serif;">Newsreader</span>
+      </div>
+      <div class="use-case">Ideal for: Creative agencies</div>
+      <h2 class="preview-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;">We make things that matter</h2>
+      <p class="preview-body" style="font-family:'Newsreader',serif;">Creativity is the intersection of constraint and freedom. The best creative work happens at the edge of what's possible, not the center of what's safe.</p>
+      <div class="preview-all-caps" style="font-family:'Bricolage Grotesque',sans-serif;">Bricolage Grotesque &middot; Newsreader &middot; Character Display + Text Serif</div>
+      <div class="font-tags"><span class="font-tag">creative</span><span class="font-tag">expressive</span><span class="font-tag">bold</span></div>
+    </article>
+
+    <!-- Pairing 11: Academic & Serious -->
+    <article class="pairing-card">
+      <div class="pairing-number">Pairing 11</div>
+      <div class="pairing-label">
+        <span class="label-heading" style="font-family:'Alegreya',serif;">Alegreya</span>
+        <span class="label-arrow">+</span>
+        <span class="label-body" style="font-family:'Rubik',sans-serif;">Rubik</span>
+      </div>
+      <div class="use-case">Ideal for: Academic & research</div>
+      <h2 class="preview-heading" style="font-family:'Alegreya',serif;font-weight:700;">Rethinking Digital Cognition</h2>
+      <p class="preview-body" style="font-family:'Rubik',sans-serif;">Recent studies establish a correlation between interface complexity and cognitive load. Simplified design is not an aesthetic preference — it is an accessibility mandate.</p>
+      <div class="preview-all-caps" style="font-family:'Alegreya',serif;">Alegreya &middot; Rubik &middot; Humanist Serif + Rounded Sans</div>
+      <div class="font-tags"><span class="font-tag">academic</span><span class="font-tag">serious</span><span class="font-tag">scholarly</span></div>
+    </article>
+
+    <!-- Pairing 12: Modern Minimalist -->
+    <article class="pairing-card">
+      <div class="pairing-number">Pairing 12</div>
+      <div class="pairing-label">
+        <span class="label-heading" style="font-family:'Outfit',sans-serif;font-weight:800;">Outfit Bold</span>
+        <span class="label-arrow">+</span>
+        <span class="label-body" style="font-family:'Alegreya',serif;">Alegreya Italic</span>
+      </div>
+      <div class="use-case">Ideal for: Portfolio & personal brand</div>
+      <h2 class="preview-heading" style="font-family:'Outfit',sans-serif;font-weight:800;">Design is thinking made visible</h2>
+      <p class="preview-body" style="font-family:'Alegreya',serif;font-style:italic;">The best portfolios don't explain their work — the work explains itself. Type steps aside and lets the craft speak.</p>
+      <div class="preview-all-caps" style="font-family:'Outfit',sans-serif;">Outfit &middot; Alegreya Italic &middot; Heavy Sans + Italic Serif</div>
+      <div class="font-tags"><span class="font-tag">minimalist</span><span class="font-tag">portfolio</span><span class="font-tag">contrast</span></div>
+    </article>
+
+  </main>
+
+</body>
+</html>
