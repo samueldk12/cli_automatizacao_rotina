@@ -318,13 +318,10 @@ def _call_llm_api(
     env_vars: dict,
     timeout: int = 120,
 ) -> str:
-    """Chama o LLM diretamente via API OpenAI-compatible.
+    """Chama o LLM diretamente via API OpenAI-compatible com retry."""
+    import time
+    import requests
 
-    Usa as mesmas env vars que o openclaude configuraria:
-      - OPENAI_BASE_URL (ex: openrouter.ai/api/v1)
-      - OPENAI_API_KEY
-      - OPENAI_MODEL
-    """
     base_url = env_vars.get("OPENAI_BASE_URL", os.environ.get("OPENAI_BASE_URL", ""))
     api_key = env_vars.get("OPENAI_API_KEY", os.environ.get("OPENAI_API_KEY", ""))
     model = env_vars.get("OPENAI_MODEL", os.environ.get("OPENAI_MODEL", "gpt-4o"))
@@ -332,15 +329,13 @@ def _call_llm_api(
     if not api_key:
         raise ValueError("OPENAI_API_KEY nao configurado")
 
-    # Garante que a URL termina com /v1
     if base_url and not base_url.endswith("/v1"):
         base_url = base_url.rstrip("/") + "/v1"
     elif base_url:
-        pass  # ja tem /v1
+        pass
     else:
         base_url = "https://api.openai.com/v1"
 
-    import requests
     url = f"{base_url}/chat/completions"
     headers = {
         "Content-Type": "application/json",
@@ -353,10 +348,23 @@ def _call_llm_api(
         "temperature": 0.7,
     }
 
-    resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
-    resp.raise_for_status()
-    data = resp.json()
-    return data["choices"][0]["message"]["content"]
+    # Retry com backoff exponencial para 429 / 5xx
+    max_retries = 4
+    for attempt in range(max_retries):
+        if attempt > 0:
+            wait = min(10 * (2 ** (attempt - 1)), 30)
+            console.print(f"  [yellow]Rate limit. Aguardando {wait}s... (tentativa {attempt+1}/{max_retries})[/yellow]")
+            time.sleep(wait)
+
+        try:
+            resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
+            resp.raise_for_status()
+            data = resp.json()
+            return data["choices"][0]["message"]["content"]
+        except requests.HTTPError as e:
+            if "429" in str(e) and attempt < max_retries - 1:
+                continue
+            raise
 
 
 def _dispatch_agent(context: str, query: str,
