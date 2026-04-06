@@ -1,8 +1,8 @@
 """
 Gerencia plugins de agentes — instalacao, criacao, e integracao com MYC.
 
-Plugins sao instalados em ~/.myc/agents/plugins/ pelo MYC,
-e em ~/.myc/agents/plugins/bundles/ ficam "bundles" de plugins por area.
+Plugins sao instalados em ~/.myc/agents/plugins/ pelo MYC (specialists),
+e em ~/.myc/agents/companies/ ficam os plugins de empresas.
 """
 
 import json
@@ -15,12 +15,13 @@ from rich.console import Console
 console = Console()
 
 PLUGINS_DIR = Path.home() / ".myc" / "agents" / "plugins"
-BUNDLES_DIR = Path.home() / ".myc" / "agents" / "bundles"
+COMPANIES_DIR = Path.home() / ".myc" / "agents" / "companies"
 PLUGIN_REGISTRY = Path.home() / ".myc" / "agents" / "plugin_registry.json"
-MYC_PLUGINS_BUILTIN = Path(__file__).parent.parent / "plugins" / "bundles"
+MYC_PLUGINS_SPECIALISTS = Path(__file__).parent.parent / "plugins" / "specialists"
+MYC_PLUGINS_COMPANIES = Path(__file__).parent.parent / "plugins" / "companies"
 
 
-# ── Bundles (conjuntos de plugins por area) ─────────────────
+# ── Bundles de Specialists (conjuntos de plugins por area) ──
 
 BUNDLES = {
     # ─── Marketing ─────────────────────────────────────────
@@ -138,8 +139,34 @@ BUNDLES = {
 }
 
 
+# ── Bundles de Empresas (conjuntos de sub-agentes por empresa) ──
+
+COMPANY_BUNDLES = {
+    "agencia_marketing_full": {
+        "name": "Agencia Marketing Full",
+        "description": "Equipe completa de marketing — social media, SEO, copy, campanhas",
+        "specialists": ["social_media", "seo_analyst", "copywriter", "campaign_manager"],
+        "company_context": "Voces sao uma agencia de marketing completa. Trabalhem em equipe cobrindo todas as areas de marketing digital.",
+    },
+    "dev_house_full": {
+        "name": "Dev House",
+        "description": "Equipe de desenvolvimento completa — frontend, backend, database, DevOps",
+        "specialists": ["frontend_dev", "backend_dev", "database_designer", "devops_deploy"],
+        "company_context": "Voces sao uma equipe de desenvolvimento full stack. Cada um cuida de sua area enquanto colabora com o todo.",
+    },
+    "security_team": {
+        "name": "Equipe de Seguranca",
+        "description": "Time completo de seguranca — auditoria, OWASP, pentest, hardening",
+        "specialists": ["web_auditor", "owasp_checker", "pentest_helper", "hardening_guide"],
+        "company_context": "Voces sao um time de seguranca ofensiva e defensiva. Cobram todas as camadas de seguranca do software.",
+    },
+}
+
+
+# ── Instalacao de Bundles ──────────────────────────────────
+
 def install_bundles(all_: bool = False, names: list[str] | None = None) -> None:
-    """Instala todos os plugins de um ou mais bundles no diretorio do usuario."""
+    """Instala todos os plugins de um ou mais bundles de specialists no diretorio do usuario."""
     from myc.plugin_installer import install_plugin
 
     PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
@@ -174,17 +201,90 @@ def install_bundles(all_: bool = False, names: list[str] | None = None) -> None:
             continue
 
         bundle = BUNDLES[bundle_id]
-        console.print(f"\n[bold cyan]Instalando bundle: {bundle['name']}[/bold cyan]")
+        console.print(f"\n[bold cyan]Instalando bundle de specialists: {bundle['name']}[/bold cyan]")
 
         for plugin_name in bundle["plugins"]:
             if install_plugin(plugin_name):
                 installed_count += 1
 
-    console.print(f"\n[green]{installed_count} plugins instalados.[/green]")
+    console.print(f"\n[green]{installed_count} plugins specialists instalados.[/green]")
+
+
+def install_company_bundle(bundle_id: str) -> None:
+    """Instala um bundle de empresa, criando o plugin company e seus specialists."""
+    from myc.plugin_installer import install_plugin, install_company_plugin
+
+    PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
+    COMPANIES_DIR.mkdir(parents=True, exist_ok=True)
+
+    if bundle_id not in COMPANY_BUNDLES:
+        console.print(f"[red]Bundle de empresa desconhecido: {bundle_id}[/red]")
+        console.print("Disponiveis: " + ", ".join(COMPANY_BUNDLES.keys()))
+        return
+
+    bundle = COMPANY_BUNDLES[bundle_id]
+    console.print(f"\n[bold cyan]Instalando empresa: {bundle['name']}[/bold cyan]")
+
+    # Instala os specialists referenciados
+    for sp_id in bundle["specialists"]:
+        install_plugin(sp_id)
+
+    # Gera o plugin de empresa
+    _generate_company_plugin(bundle_id, bundle)
+
+
+def _generate_company_plugin(bundle_id: str, bundle: dict) -> None:
+    """Gera um plugin de empresa dinamicamente a partir de um bundle."""
+    import json
+
+    specialists_list = []
+    for sp_id in bundle["specialists"]:
+        # Tenta pegar nome e descricao do specialist
+        try:
+            from myc.plugin_installer import get_plugin_meta
+            meta = get_plugin_meta(sp_id)
+            sp_name = meta["name"] if meta else sp_id
+        except Exception:
+            sp_name = sp_id
+
+        specialists_list.append({
+            "id": sp_id,
+            "name": sp_name,
+            "role": f"Especialista em {sp_name}. Responsavel por todas as tarefas relacionadas a esta area dentro da empresa.",
+            "specialists": [sp_id],  # referencia a si mesmo
+        })
+
+    ctx_lines = [bundle["company_context"]]
+    ctx_lines.append("\nEspecialistas disponiveis nesta empresa:")
+    for s in specialists_list:
+        ctx_lines.append(f"  - {s['name']} (ID: {s['id']})")
+
+    context_block = f'''
+def COMPANY_CONTEXT():
+    return """{"\n".join(ctx_lines)}"""
+'''
+
+    template = f'''"""
+Empresa: {bundle['name']}
+Descricao: {bundle['description']}
+Gerada automaticamente via bundle: {bundle_id}
+"""
+
+NAME = "{bundle['name']}"
+DESCRIPTION = "{bundle['description']}"
+
+SPECIALISTS = {json.dumps(specialists_list, indent=4, ensure_ascii=False)}
+{context_block}
+'''
+
+    COMPANIES_DIR.mkdir(parents=True, exist_ok=True)
+    target = COMPANIES_DIR / f"{bundle_id}.py"
+    target.write_text(template, encoding="utf-8")
+    console.print(f"[green]Empresa '{bundle_id}' criada em {target}[/green]")
 
 
 def register_bundle_install(bundle_id: str, agent_name: str) -> None:
-    """Registra que um bundle foi instalado para um agente especifico."""
+    """Registra que um bundle de specialists foi instalado para um agente especifico."""
     from myc.agent import _load_agents, _save_agents
 
     agents = _load_agents()
@@ -220,11 +320,11 @@ def register_bundle_install(bundle_id: str, agent_name: str) -> None:
 
 
 def list_bundles() -> None:
-    """Lista todos os bundles disponiveis e status de instalacao."""
+    """Lista todos os bundles de specialists disponiveis e status de instalacao."""
     from rich.table import Table
     from myc.plugin_installer import get_plugin_meta
 
-    table = Table(title="Bundles de Plugins", show_lines=True)
+    table = Table(title="Bundles de Specialists", show_lines=True)
     table.add_column("Bundle", style="cyan")
     table.add_column("Nome", style="yellow")
     table.add_column("Plugins", style="green")
@@ -237,5 +337,26 @@ def list_bundles() -> None:
                 installed += 1
         status = f"{installed}/{len(bdata['plugins'])}"
         table.add_row(bid, bdata["name"], str(len(bdata["plugins"])), status)
+
+    console.print(table)
+
+
+def list_company_bundles() -> None:
+    """Lista todos os bundles de empresas disponiveis."""
+    from rich.table import Table
+
+    table = Table(title="Bundles de Empresas", show_lines=True)
+    table.add_column("Bundle", style="cyan")
+    table.add_column("Nome", style="yellow")
+    table.add_column("Descricao", style="green")
+    table.add_column("Specialists", style="dim")
+
+    for bid, bdata in COMPANY_BUNDLES.items():
+        table.add_row(
+            bid,
+            bdata["name"],
+            bdata["description"],
+            ", ".join(bdata["specialists"]),
+        )
 
     console.print(table)

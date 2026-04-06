@@ -805,12 +805,431 @@ def _install_openclaude() -> None:
 @click.option("--group", "-g", default=None, help="Executa comandos de um grupo MYC")
 @click.option("--subcommand", "-s", default=None, help="Subcomando especifico")
 def automate_cmd(agent_name: str, group: Optional[str], subcommand: Optional[str]) -> None:
-    """Lanca um agente e executa rotinas MYC como contexto.
+    """Lanca um agente e executa rotinas MYC como contexto."""
+    from myc.agent import launch_with_myc_tasks
+    launch_with_myc_tasks(agent_name, group=group, subcommand=subcommand)
+
+
+# ─── agent: bundle ─────────────────────────────
+
+@agent_cmd.command(name="bundle-install")
+@click.option("--all", "all_", is_flag=True, help="Instala todos os bundles")
+@click.option("--company", is_flag=True, help="Instala bundles de empresas")
+@click.argument("names", nargs=-1, required=False)
+def agent_bundle_install_cmd(all_: bool, company: bool, names: tuple) -> None:
+    """Instala bundles de specialists ou empresas.
 
     \b
     Exemplos:
-      myc automate dev --group estudar
-      myc automate dev --group trabalhar --subcommand daily-standup
+      myc agent bundle-install --all
+      myc agent bundle-install fullstack professor
+      myc agent bundle-install --company dev_house_full
     """
-    from myc.agent import launch_with_myc_tasks
-    launch_with_myc_tasks(agent_name, group=group, subcommand=subcommand)
+    if company:
+        from myc.plugin_manager import COMPANY_BUNDLES, install_company_bundle, list_company_bundles
+        if all_ or not names:
+            if not names:
+                list_company_bundles()
+                return
+            for bid in COMPANY_BUNDLES:
+                install_company_bundle(bid)
+        else:
+            for bid in names:
+                install_company_bundle(bid)
+    else:
+        from myc.plugin_manager import install_bundles
+        install_bundles(all_=all_, names=list(names) if names else None)
+
+
+@agent_cmd.command(name="bundle-list")
+@click.option("--company", is_flag=True, help="Lista bundles de empresas")
+def agent_bundle_list_cmd(company: bool) -> None:
+    """Lista bundles disponiveis."""
+    if company:
+        from myc.plugin_manager import list_company_bundles
+        list_company_bundles()
+    else:
+        from myc.plugin_manager import list_bundles
+        list_bundles()
+
+
+# ─── agent: specialist ─────────────────────────
+
+@main.command(name="agent-specialist")
+@click.argument("name", required=True)
+@click.option("-o", "--middleware", "middlewares", multiple=True, help="Aplica middleware(s)")
+@click.argument("command", nargs=-1, required=False)
+def agent_specialist_cmd(name: str, middlewares: tuple, command: tuple) -> None:
+    """Lanca um especialista com query.
+
+    \b
+    Exemplos:
+      myc agent-specialist social_media "crie calendario editorial"
+      myc agent-specialist frontend_dev -o prompt_enhancer "crie componente login"
+      myc agent-specialist backend_dev -o security_checker "implemente auth JWT"
+    """
+    from myc.agent_plugins import list_plugins, execute_plugins
+
+    available = {p["id"]: p["name"] for p in list_plugins()}
+    if name not in available:
+        console.print(f"[red]Specialist '{name}' nao encontrado.[/red]")
+        console.print(f"Disponiveis: {', '.join(available.keys())}")
+        sys.exit(1)
+
+    # Monta query
+    query = " ".join(command) if command else ""
+    if not query:
+        console.print(f"[yellow]Nenhum comando fornecido. Abrindo prompt interativo...[/yellow]")
+        import questionary
+        query = questionary.text("O que o especialista deve fazer?").ask() or ""
+        if not query:
+            return
+
+    # Aplica middlewares pre no prompt
+    for mw_id in middlewares:
+        mw_file = Path.home() / ".myc" / "agents" / "middlewares" / f"{mw_id}.py"
+        if mw_file.exists():
+            try:
+                import importlib.util
+                spec = importlib.util.spec_from_file_location(mw_id, mw_file)
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                fn = getattr(mod, "PROMPT_MODIFY", None)
+                if fn:
+                    query = fn(query, {})
+                    console.print(f"[dim]Middleware '{mw_id}' aplicado ao prompt.[/dim]")
+            except Exception as e:
+                console.print(f"[yellow]Middleware '{mw_id}' falhou: {e}[/yellow]")
+
+    # Cria agente temp com o specialist + middlewares
+    _launch_specialist_query(name, query, list(middlewares))
+
+
+def _launch_specialist_query(specialist_id: str, query: str, middleware_ids: list) -> int:
+    """Lanca uma query num specialist (usa agente 'default' se existir, senao imprime)."""
+    from myc.agent import _load_agents, _write_claude_md, launch_agent
+    from myc.agent_plugins import _load_plugin_file
+    from pathlib import Path
+
+    PLUGINS_DIR = Path.home() / ".myc" / "agents" / "plugins"
+
+    # Carrega contexto do specialist
+    plugin_file = PLUGINS_DIR / f"{specialist_id}.py"
+    if not plugin_file.exists():
+        from myc.plugin_installer import SPECIALISTS_DIR
+        import shutil
+        builtin = SPECIALISTS_DIR / f"{specialist_id}.py"
+        if builtin.exists():
+            shutil.copy2(str(builtin), str(plugin_file))
+
+    context = ""
+    if plugin_file.exists():
+        try:
+            mod = _load_plugin_file(plugin_file)
+            if mod:
+                ctx_fn = getattr(mod, "CONTEXT", None)
+                if ctx_fn:
+                    context = ctx_fn({})
+                else:
+                    name = getattr(mod, "NAME", specialist_id)
+                    context = f"Voce e {name}. {getattr(mod, 'DESCRIPTION', '')}"
+        except Exception:
+            context = f"Voce e o especialista '{specialist_id}'."
+    else:
+        console.print(f"[red]Plugin specialist '{specialist_id}' nao encontrado.[/red]")
+        console.print(f"Instale com: myc agent bundle-install")
+        return 1
+
+    final_prompt = f"{context}\n\n---\n\n## Tarefa\n\n{query}"
+
+    # Tenta lancar via agente 'default'
+    agents = _load_agents()
+    if "default" in agents:
+        # Grava CLAUDE.md temporario no cwd
+        cwd = agents["default"].get("cwd") or str(Path.cwd())
+        md_path = Path(cwd) / "CLAUDE.md"
+        if md_path.exists():
+            backup = md_path.read_text(encoding="utf-8")
+            md_path.write_text(f"# Agent: {specialist_id}\n\n## MYC Tasks\n\n## {specialist_id} Context\n\n{context}\n\n---\n\n## Tarefa\n\n{query}", encoding="utf-8")
+            try:
+                rc = launch_agent("default", cwd=cwd)
+                md_path.write_text(backup, encoding="utf-8")
+                return rc
+            except Exception:
+                md_path.write_text(backup, encoding="utf-8")
+                return 1
+        else:
+            md_path.write_text(f"# Agent: {specialist_id}\n\n## {specialist_id} Context\n\n{context}\n\n---\n\n## Tarefa\n\n{query}", encoding="utf-8")
+            try:
+                rc = launch_agent("default", cwd=cwd)
+                md_path.unlink(missing_ok=True)
+                return rc
+            except Exception:
+                md_path.unlink(missing_ok=True)
+                return 1
+    else:
+        # Sem agente configurado — mostra o prompt
+        console.print(f"\n[bold]Specialist: {specialist_id}[/bold]\n")
+        console.print(final_prompt)
+        console.print("\n[yellow]Nenhum agente 'default' configurado para executar.[/yellow]")
+        console.print("Configure com: [cyan]myc agent add[/cyan]")
+        return 0
+
+
+# ─── agent: company ────────────────────────────
+
+@main.command(name="agent-company")
+@click.argument("company_name", required=True)
+@click.argument("specialist_arg", required=False, default=None)
+@click.option("-o", "--middleware", "middlewares", multiple=True, help="Aplica middleware(s)")
+@click.argument("command", nargs=-1, required=False)
+def agent_company_cmd(company_name: str, specialist_arg: Optional[str], middlewares: tuple, command: tuple) -> None:
+    """Lanca empresa com sub-agente especializado.
+
+    \b
+    Exemplos:
+      myc agent-company dev_agency tech_lead "crie arquitetura microservicos"
+      myc agent-company marketing_agency_company social_strategist "planeje campanha Q4"
+      myc agent-company dev_agency -o prompt_enhancer "refatore API REST"
+      myc agent-company dev_agency  # lista sub-agentes disponiveis
+    """
+    from myc.agent_plugins import execute_company_profile, list_companies, list_plugins as _list
+
+    available = {c["id"]: c["name"] for c in list_companies()}
+    if company_name not in available:
+        console.print(f"[red]Empresa '{company_name}' nao encontrada.[/red]")
+        console.print(f"Disponiveis: {', '.join(available.keys())}")
+        sys.exit(1)
+
+    query = " ".join(command) if command else ""
+
+    if specialist_arg is None:
+        # Mostra sub-agentes
+        context = execute_company_profile(company_name)
+        console.print(f"\n[bold]Empresa: {available[company_name]}[/bold]\n")
+        console.print(context)
+        return
+
+    if not query:
+        import questionary
+        query = questionary.text(
+            f"O que '{specialist_arg}' na empresa '{company_name}' deve fazer?",
+        ).ask() or ""
+        if not query:
+            return
+
+    # Aplica middlewares pre
+    for mw_id in middlewares:
+        mw_file = Path.home() / ".myc" / "agents" / "middlewares" / f"{mw_id}.py"
+        if mw_file.exists():
+            try:
+                import importlib.util
+                spec = importlib.util.spec_from_file_location(mw_id, mw_file)
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                fn = getattr(mod, "PROMPT_MODIFY", None)
+                if fn:
+                    query = fn(query, {})
+                    console.print(f"[dim]Middleware '{mw_id}' aplicado.[/dim]")
+            except Exception as e:
+                console.print(f"[yellow]Middleware '{mw_id}' falhou: {e}[/yellow]")
+
+    context = execute_company_profile(company_name, specialist_id=specialist_arg)
+    if not context:
+        return
+
+    _launch_query_as_agent(f"{company_name}/{specialist_arg}", context, query)
+
+
+# ─── agent: department ─────────────────────────
+
+@main.command(name="agent-department")
+@click.argument("department_name", required=True)
+@click.option("-o", "--middleware", "middlewares", multiple=True, help="Aplica middleware(s)")
+@click.option("-c", "--company", default=None, help="Filtra por empresa")
+@click.argument("command", nargs=-1, required=False)
+def agent_department_cmd(department_name: str, middlewares: tuple, company: Optional[str], command: tuple) -> None:
+    """Lanca departamento ou equipe.
+
+    \b
+    Exemplos:
+      myc agent-department marketing "crie campanha de vendas"
+      myc agent-department marketing -o prompt_enhancer "planeje estrategia SEO"
+      myc agent-department dev_frontend -c dev_agency "crie dashboard admin"
+      myc agent-department --list  # lista departamentos
+    """
+    from myc.department import list_departments, get_department_context
+
+    query = " ".join(command) if command else ""
+
+    # Lista se sem comando
+    if department_name == "--list":
+        depts = list_departments(company_id=company)
+        if not depts:
+            console.print("[yellow]Nenhum departamento encontrado.[/yellow]")
+            return
+        from rich.table import Table
+        table = Table(title="Departamentos", show_lines=True)
+        table.add_column("ID", style="cyan")
+        table.add_column("Nome", style="yellow")
+        table.add_column("Descricao", style="green")
+        table.add_column("Specialists", style="dim")
+        table.add_column("Empresa", style="magenta")
+        for d in depts:
+            table.add_row(
+                d["id"],
+                d["name"],
+                d["description"],
+                ", ".join(d.get("specialists", [])) or "-",
+                d.get("parent_company") or "independente",
+            )
+        console.print(table)
+        return
+
+    depts = list_departments(company_id=company)
+    match = None
+    for d in depts:
+        if d["id"] == department_name:
+            match = d
+            break
+
+    if not match:
+        console.print(f"[red]Departamento '{department_name}' nao encontrado.[/red]")
+        available = [d["id"] for d in depts]
+        if available:
+            console.print(f"Disponiveis: {', '.join(available)}")
+        else:
+            console.print("Nenhum departamento disponivel. Crie com departamentos built-in.")
+        sys.exit(1)
+
+    if not query:
+        import questionary
+        query = questionary.text(f"O que o departamento '{department_name}' deve fazer?").ask() or ""
+        if not query:
+            return
+
+    # Aplica middlewares pre
+    for mw_id in middlewares:
+        mw_file = Path.home() / ".myc" / "agents" / "middlewares" / f"{mw_id}.py"
+        if mw_file.exists():
+            try:
+                import importlib.util
+                spec = importlib.util.spec_from_file_location(mw_id, mw_file)
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                fn = getattr(mod, "PROMPT_MODIFY", None)
+                if fn:
+                    query = fn(query, {})
+                    console.print(f"[dim]Middleware '{mw_id}' aplicado.[/dim]")
+            except Exception as e:
+                console.print(f"[yellow]Middleware '{mw_id}' falhou: {e}[/yellow]")
+
+    context = get_department_context(department_name)
+    if not context:
+        console.print(f"[red]Nao foi possivel carregar contexto do departamento.[/red]")
+        return
+
+    _launch_query_as_agent(f"department/{department_name}", context, query)
+
+
+# ─── agent: middleware ─────────────────────────
+
+@agent_cmd.command(name="middleware")
+@click.option("--list", "list_", is_flag=True, help="Lista middlewares instalados")
+def agent_middleware_cmd(list_: bool) -> None:
+    """Lista middlewares disponiveis."""
+    if not list_:
+        console.print("Use [cyan]myc agent middleware --list[/cyan]")
+        return
+
+    from rich.table import Table
+    from pathlib import Path
+
+    MW_DIR = Path.home() / ".myc" / "agents" / "middlewares"
+    MW_BUILTIN = Path(__file__).parent.parent / "plugins" / "middlewares"
+
+    # Auto-instala builtins
+    for f in MW_BUILTIN.glob("*.py"):
+        if f.stem.startswith("_"):
+            continue
+        target = MW_DIR / f.name
+        if not target.exists():
+            import shutil
+            shutil.copy2(str(f), str(target))
+
+    table = Table(title="Middlewares", show_lines=True)
+    table.add_column("ID", style="cyan")
+    table.add_column("Nome", style="yellow")
+    table.add_column("Descricao", style="green")
+    table.add_column("Tipo", style="magenta")
+    table.add_column("Quando", style="dim")
+
+    for f in MW_DIR.glob("*.py"):
+        if f.stem.startswith("_"):
+            continue
+        try:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location(f.stem, f)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            table.add_row(
+                f.stem,
+                getattr(mod, "NAME", f.stem),
+                getattr(mod, "DESCRIPTION", ""),
+                getattr(mod, "MIDDLEWARE_TYPE", "?"),
+                getattr(mod, "RUNS_WHEN", "manual"),
+            )
+        except Exception as e:
+            table.add_row(f.stem, f"[ERRO]", str(e), "?", "?")
+
+    console.print(table)
+
+
+# ─── agent: department create ─────────────────
+
+@agent_cmd.command(name="department-add")
+def agent_department_add_cmd() -> None:
+    """Cria um novo departamento/equipe (wizard)."""
+    from myc.department import create_department_wizard
+    create_department_wizard()
+
+
+@agent_cmd.command(name="company-add")
+def agent_company_add_cmd() -> None:
+    """Cria uma nova empresa (wizard)."""
+    from myc.agent_plugins import create_company_wizard
+    create_company_wizard()
+
+
+def _launch_query_as_agent(agent_label: str, context: str, query: str) -> int:
+    """Lanca uma query via agente 'default' com contexto injetado."""
+    from myc.agent import _load_agents, launch_agent
+    from pathlib import Path
+
+    agents = _load_agents()
+    if "default" in agents:
+        cwd = agents["default"].get("cwd") or str(Path.cwd())
+        md_path = Path(cwd) / "CLAUDE.md"
+        backup = None
+        if md_path.exists():
+            backup = md_path.read_text(encoding="utf-8")
+        md_path.write_text(f"# Agent: {agent_label}\n\n{context}\n\n---\n\n## Tarefa\n\n{query}", encoding="utf-8")
+        try:
+            rc = launch_agent("default", cwd=cwd)
+            if backup is not None:
+                md_path.write_text(backup, encoding="utf-8")
+            else:
+                md_path.unlink(missing_ok=True)
+            return rc
+        except Exception:
+            if backup is not None:
+                md_path.write_text(backup, encoding="utf-8")
+            else:
+                md_path.unlink(missing_ok=True)
+            return 1
+    else:
+        console.print(f"\n[bold]{agent_label}[/bold]\n")
+        console.print(f"{context}\n\n---\n\n## Tarefa\n\n{query}")
+        console.print("\n[yellow]Nenhum agente 'default' configurado.[/yellow]")
+        console.print("Configure com: [cyan]myc agent add[/cyan]")
+        return 0

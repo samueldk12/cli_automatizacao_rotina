@@ -87,8 +87,19 @@ PLATFORM_COMMANDS = {
 }
 
 
-def _find_command(name: str) -> str | None:
-    for path in os.environ.get("PATH", "").split(os.pathsep):
+KNOWN_NPM_PATHS = [
+    str(Path.home() / "AppData" / "Roaming" / "npm"),
+    str(Path.home() / "bin"),
+    "/usr/local/bin",
+    str(Path.home() / ".npm-global/bin"),
+]
+
+
+def _find_command(name: str, extra_paths: list[str] | None = None) -> str | None:
+    search_paths = os.environ.get("PATH", "").split(os.pathsep) + KNOWN_NPM_PATHS
+    if extra_paths:
+        search_paths.extend(extra_paths)
+    for path in search_paths:
         candidate = Path(path) / name
         if candidate.exists():
             return str(candidate)
@@ -494,13 +505,23 @@ def _build_launch_cmd(platform: str,
                        custom_cmd: str | None) -> tuple[list, bool] | None:
     """Retorna (lista de argumentos, shell_bool) ou None."""
     if platform == "openclaude":
-        return (["openclaude"], False)
+        bin_path = _find_binary(platform)
+        if bin_path:
+            use_shell = bin_path.endswith((".cmd", ".bat"))
+            return ([bin_path], use_shell)
+        return (["openclaude"], True)
     if platform == "cursor":
-        return (["cursor", "."], False)
+        bin_path = _find_binary(platform)
+        return ([bin_path if bin_path else "cursor", "."], False)
     if platform == "vscode_copilot":
-        return (["code", "."], False)
+        bin_path = _find_binary(platform)
+        return ([bin_path if bin_path else "code", "."], False)
     if platform == "codex":
-        return (["codex"], False)
+        bin_path = _find_binary(platform)
+        if bin_path:
+            use_shell = bin_path.endswith((".cmd", ".bat"))
+            return ([bin_path], use_shell)
+        return (["codex"], True)
     if platform == "custom" and custom_cmd:
         return (custom_cmd, True)
     return None
