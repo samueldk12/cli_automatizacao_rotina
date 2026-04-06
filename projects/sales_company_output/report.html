@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Empresa de Vendas - MYC Report</title>
+<style>
+:root{--bg:#121218;--bg2:#1e1e28;--bg3:#282836;--bd:#3a3a4a;--tx:#e8e8f0;--tx2:#a0a0b8;--tx3:#6a6a7e;--green:#2ec453;--cyan:#00d2d3;--yellow:#ffc107;--blue:#0d6efd;--purple:#a55eea;--orange:#fd7e14;--red:#dc3545}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.6}
+.hdr{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);padding:40px 24px;text-align:center;border-bottom:3px solid var(--cyan)}
+.hdr h1{font-size:2.2rem;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hdr .sub{color:var(--tx2);font-size:1.05rem;margin-top:8px}.hdr .dt{color:var(--tx3);font-size:.85rem;margin-top:12px}
+.ctn{max-width:1100px;margin:0 auto;padding:24px}.sec{background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:24px;margin-bottom:24px}
+.sec h2{font-size:1.4rem;color:var(--cyan);border-bottom:2px solid var(--bd);padding-bottom:8px;margin-bottom:4px}.sec .sst{color:var(--tx3);font-size:.9rem;margin-bottom:16px}
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:16px}
+.mc{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:16px;text-align:center}.mc .ml{color:var(--tx2);font-size:.85rem;margin-bottom:8px}.mc .mv{font-size:1.3rem;font-weight:700}
+table{width:100%;border-collapse:collapse;margin:16px 0}th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--bd)}
+th{background:var(--bg2);color:var(--cyan);font-weight:600;font-size:.85rem}td{color:var(--tx2);font-size:.9rem}
+.cc{margin:16px 0}.cc h4{color:var(--tx);margin-bottom:10px}.bar-r{display:flex;align-items:center;margin-bottom:8px}
+.bar-l{width:140px;color:var(--tx2);font-size:.85rem;text-align:right;padding-right:12px}.bar-c{flex:1;background:var(--bg2);border-radius:4px;height:24px;overflow:hidden}.bar{height:100%;border-radius:4px}.bar-v{width:60px;text-align:right;color:var(--tx3);font-size:.85rem}
+.ft{text-align:center;padding:20px;color:var(--tx3);font-size:.8rem;border-top:1px solid var(--bd)}
+</style>
+</head>
+<body>
+<div class="hdr"><h1>Empresa de Vendas</h1><div class="sub">CRM, pipeline de vendas e calculo de comissoes</div><div class="dt">MYC Vendas | 06/04/2026</div></div>
+<div class="ctn">
+<section class="sec"><h2>Ferramentas Desenvolvidas</h2>
+<div class="mg">
+<div class="mc"><div class="ml">CRM Pipeline</div><div class="mv" style="color:var(--cyan)">crm_pipeline.py</div></div>
+<div class="mc"><div class="ml">Comissao Calculator</div><div class="mv" style="color:var(--green)">comissao_calculator.py</div></div>
+</div></section>
+<section class="sec"><h2>Pipeline de Vendas</h2>
+<table>
+<thead><tr><th>Etapa</th><th>Leads</th><th>Conversao</th><th>Val. Medio</th></tr></thead>
+<tbody>
+<tr><td>Lead</td><td>500</td><td>100%</td><td>-</td></tr>
+<tr><td>Qualificacao</td><td>250</td><td>50%</td><td>R$ 15.000</td></tr>
+<tr><td>Proposta</td><td>120</td><td>24%</td><td>R$ 25.000</td></tr>
+<tr><td>Negociacao</td><td>60</td><td>12%</td><td>R$ 35.000</td></tr>
+<tr><td>Fechamento</td><td>35</td><td>7%</td><td>R$ 42.000</td></tr>
+</tbody></table></section>
+<section class="sec"><h2>Metricas de Vendas</h2>
+<div class="cc"><h4>KPIs</h4>
+<div class="bar-r"><span class="bar-l">Win Rate</span><div class="bar-c"><div class="bar" style="width:7%;background:var(--green)"></div></div><span class="bar-v">7%</span></div>
+<div class="bar-r"><span class="bar-l">Ticket Medio</span><div class="bar-c"><div class="bar" style="width:42%;background:var(--cyan)"></div></div><span class="bar-v">R$42k</span></div>
+<div class="bar-r"><span class="bar-l">Velocity</span><div class="bar-c"><div class="bar" style="width:65%;background:var(--purple)"></div></div><span class="bar-v">45d</span></div>
+<div class="bar-r"><span class="bar-l">Coverage</span><div class="bar-c"><div class="bar" style="width:80%;background:var(--blue)"></div></div><span class="bar-v">3.2x</span></div>
+</div></section>
+</div>
+<div class="ft"><p>MYC - My Company Assistant | 06/04/2026</p></div>
+</body>
+</html>
