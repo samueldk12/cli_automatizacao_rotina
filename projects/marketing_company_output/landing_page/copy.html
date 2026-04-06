@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow — Where Work Flows Naturally</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0d0d0d;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+        /* Nav */
+        nav {
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            background: rgba(13,13,13,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #2a2a4a;
+            z-index: 100;
+        }
+        .nav-inner { display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: #fff; }
+        .logo span { color: #00d4ff; }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a { color: #9e9e9e; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        .nav-links a:hover { color: #fff; }
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            color: #fff;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,212,255,0.3); }
+        .btn-sm { padding: 8px 20px; font-size: 0.85rem; }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #2a2a4a;
+            color: #e0e0e0;
+        }
+        .btn-outline:hover { border-color: #00d4ff; color: #00d4ff; }
+
+        /* Hero */
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+            background: radial-gradient(ellipse at top, #1a1a2e 0%, #0d0d0d 70%);
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+        }
+        .hero h1 span {
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: #9e9e9e;
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+        .hero-ctas { display: flex; gap: 16px; justify-content: center; margin-bottom: 48px; }
+        .hero-social-proof { color: #9e9e9e; font-size: 0.9rem; }
+        .hero-social-proof strong { color: #fff; }
+
+        .hero-mockup {
+            margin-top: 60px;
+            background: #16213e;
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 1px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .mockup-browser {
+            background: #1a1a2e;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .mockup-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #ff5f57;
+        }
+        .mockup-dot:nth-child(2) { background: #febc2e; }
+        .mockup-dot:nth-child(3) { background: #28c840; }
+        .mockup-url {
+            margin-left: 12px;
+            background: #0d0d0d;
+            padding: 4px 16px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #9e9e9e;
+            flex: 1;
+        }
+        .mockup-body {
+            padding: 24px;
+            min-height: 300px;
+            background: #0d0d0d;
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 16px;
+        }
+        .mockup-sidebar {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .mockup-sidebar-item {
+            padding: 8px;
+            margin: 4px 0;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: #9e9e9e;
+        }
+        .mockup-sidebar-item.active { background: rgba(0,212,255,0.15); color: #00d4ff; }
+        .mockup-content { background: #16213e; border-radius: 8px; padding: 16px; }
+        .mockup-kanban {
+            display: flex; gap: 12px;
+        }
+        .mockup-column {
+            flex: 1; background: #1a1a2e; border-radius: 6px; padding: 12px;
+        }
+        .mockup-col-title { font-size: 0.7rem; font-weight: 600; color: #fff; text-transform: uppercase; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px solid; }
+        .mockup-col-title.blue { border-color: #00d4ff; }
+        .mockup-col-title.green { border-color: #00e676; }
+        .mockup-col-title.orange { border-color: #ff9100; }
+        .mockup-card {
+            background: #16213e; border-radius: 4px; padding: 8px; margin-bottom: 8px;
+            font-size: 0.65rem; color: #9e9e9e; border-left: 2px solid;
+        }
+        .mockup-card.c-blue { border-color: #00d4ff; }
+        .mockup-card.c-green { border-color: #00e676; }
+        .mockup-card.c-orange { border-color: #ff9100; }
+
+        /* Logos */
+        .logos { padding: 60px 0; text-align: center; }
+        .logos-label { font-size: 0.85rem; color: #9e9e9e; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 24px; }
+        .logos-grid {
+            display: flex; justify-content: center; align-items: center; gap: 48px; flex-wrap: wrap; opacity: 0.5;
+        }
+        .logo-placeholder {
+            font-size: 1rem; font-weight: 600; color: #9e9e9e; padding: 12px 24px;
+            background: #16213e; border-radius: 8px; border: 1px solid #2a2a4a;
+        }
+
+        /* Features */
+        .features { padding: 80px 0; }
+        .features h2 {
+            font-size: 2.5rem; color: #fff; text-align: center; margin-bottom: 16px;
+        }
+        .features .subtitle { text-align: center; color: #9e9e9e; margin-bottom: 60px; font-size: 1.1rem; }
+        .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .feature-card {
+            background: #16213e;
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 32px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .feature-card:hover { transform: translateY(-4px); border-color: #00d4ff; }
+        .feature-icon {
+            width: 48px; height: 48px; border-radius: 12px; display: flex;
+            align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 20px;
+        }
+        .fi-blue { background: rgba(0,212,255,0.15); color: #00d4ff; }
+        .fi-green { background: rgba(0,230,118,0.15); color: #00e676; }
+        .fi-purple { background: rgba(123,44,191,0.15); color: #7b2cbf; }
+        .fi-orange { background: rgba(255,145,0,0.15); color: #ff9100; }
+        .fi-pink { background: rgba(245,0,87,0.15); color: #f50057; }
+        .fi-yellow { background: rgba(255,214,0,0.15); color: #ffd600; }
+        .feature-card h3 { font-size: 1.2rem; color: #fff; margin-bottom: 12px; }
+        .feature-card p { font-size: 0.9rem; color: #9e9e9e; line-height: 1.6; }
+
+        /* Stats */
+        .stats { padding: 60px 0; background: #16213e; border-top: 1px solid #2a2a4a; border-bottom: 1px solid #2a2a4a; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; text-align: center; }
+        .stat-value { font-size: 2.5rem; font-weight: 700; color: #00d4ff; margin-bottom: 4px; }
+        .stat-label { font-size: 0.9rem; color: #9e9e9e; }
+
+        /* Pricing */
+        .pricing { padding: 80px 0; }
+        .pricing h2 { font-size: 2.5rem; color: #fff; text-align: center; margin-bottom: 16px; }
+        .pricing .subtitle { text-align: center; color: #9e9e9e; margin-bottom: 60px; font-size: 1.1rem; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .pricing-card {
+            background: #16213e; border: 1px solid #2a2a4a; border-radius: 16px;
+            padding: 40px 32px; text-align: center; position: relative;
+        }
+        .pricing-card.popular {
+            border-color: #00d4ff;
+            box-shadow: 0 0 40px rgba(0,212,255,0.1);
+        }
+        .pricing-card.popular::before {
+            content: 'Most Popular';
+            position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            color: #fff; padding: 6px 20px; border-radius: 20px;
+            font-size: 0.8rem; font-weight: 600;
+        }
+        .pricing-name { font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 8px; }
+        .pricing-desc { font-size: 0.85rem; color: #9e9e9e; margin-bottom: 24px; }
+        .pricing-amount { font-size: 3rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+        .pricing-amount span { font-size: 1rem; font-weight: 400; color: #9e9e9e; }
+        .pricing-period { font-size: 0.85rem; color: #9e9e9e; margin-bottom: 32px; }
+        .pricing-features { text-align: left; list-style: none; }
+        .pricing-features li {
+            padding: 8px 0; font-size: 0.9rem; color: #e0e0e0;
+            border-bottom: 1px solid rgba(42,42,74,0.5);
+        }
+        .pricing-features li::before { content: '✓ '; color: #00e676; font-weight: 700; }
+        .pricing-features li:last-child { border: none; }
+        .pricing-cta { margin-top: 32px; width: 100%; display: block; text-align: center; }
+
+        /* Testimonials */
+        .testimonials { padding: 80px 0; background: #1a1a2e; border-top: 1px solid #2a2a4a; }
+        .testimonials h2 { font-size: 2.5rem; color: #fff; text-align: center; margin-bottom: 60px; }
+        .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .testimonial-card {
+            background: #16213e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 32px;
+        }
+        .testimonial-stars { color: #ffd600; margin-bottom: 16px; font-size: 1rem; }
+        .testimonial-text { font-size: 0.95rem; color: #e0e0e0; margin-bottom: 24px; line-height: 1.7; }
+        .testimonial-author { display: flex; align-items: center; gap: 12px; }
+        .testimonial-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.9rem; color: #fff;
+        }
+        .testimonial-name { font-weight: 600; color: #fff; font-size: 0.9rem; }
+        .testimonial-role { font-size: 0.8rem; color: #9e9e9e; }
+
+        /* FAQ */
+        .faq { padding: 80px 0; }
+        .faq h2 { font-size: 2.5rem; color: #fff; text-align: center; margin-bottom: 60px; }
+        .faq-list { max-width: 700px; margin: 0 auto; }
+        .faq-item {
+            border-bottom: 1px solid #2a2a4a; padding: 24px 0;
+        }
+        .faq-question {
+            font-size: 1.1rem; font-weight: 600; color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .faq-question::after { content: '+'; font-size: 1.5rem; color: #00d4ff; font-weight: 300; }
+        .faq-answer { margin-top: 16px; color: #9e9e9e; font-size: 0.95rem; line-height: 1.7; }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 80px 0; text-align: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-top: 1px solid #2a2a4a;
+        }
+        .cta-section h2 { font-size: 2.5rem; color: #fff; margin-bottom: 16px; }
+        .cta-section h2 span { background: linear-gradient(135deg, #00d4ff, #7b2cbf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .cta-section p { font-size: 1.1rem; color: #9e9e9e; max-width: 500px; margin: 0 auto 32px; }
+
+        /* Footer */
+        footer { padding: 40px 0; border-top: 1px solid #2a2a4a; }
+        .footer-inner { display: flex; justify-content: space-between; align-items: center; }
+        .footer-copy { font-size: 0.85rem; color: #9e9e9e; }
+        .footer-links { display: flex; gap: 24px; }
+        .footer-links a { color: #9e9e9e; text-decoration: none; font-size: 0.85rem; }
+        .footer-links a:hover { color: #00d4ff; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .feature-grid, .pricing-grid, .testimonials-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .mockup-body { grid-template-columns: 1fr; }
+            .hero-ctas { flex-direction: column; align-items: center; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="container nav-inner">
+        <div class="logo"><span>Task</span>Flow</div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#testimonials">Testimonials</a>
+            <a href="#faq">FAQ</a>
+            <a href="#" class="btn btn-primary btn-sm">Start Free Trial</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="container">
+        <h1>Where Work <span>Flows Naturally</span></h1>
+        <p>The project management platform that helps tech teams ship faster, stress less, and actually enjoy Monday mornings.</p>
+        <div class="hero-ctas">
+            <a href="#" class="btn btn-primary">Start Free Trial — No Credit Card</a>
+            <a href="#" class="btn btn-outline">Watch 2-Min Demo</a>
+        </div>
+        <div class="hero-social-proof">
+            <strong>1,200+ teams</strong> already onboard &middot; <strong>4.9/5</strong> average rating &middot; Setup in <strong>under 2 min</strong>
+        </div>
+        <div class="hero-mockup">
+            <div class="mockup-browser">
+                <div class="mockup-dot"></div>
+                <div class="mockup-dot"></div>
+                <div class="mockup-dot"></div>
+                <div class="mockup-url">app.taskflow.io/dashboard</div>
+            </div>
+            <div class="mockup-body">
+                <div class="mockup-sidebar">
+                    <div class="mockup-sidebar-item active">📊 Dashboard</div>
+                    <div class="mockup-sidebar-item">📋 Projects</div>
+                    <div class="mockup-sidebar-item">📅 Calendar</div>
+                    <div class="mockup-sidebar-item">⏱ Time Tracking</div>
+                    <div class="mockup-sidebar-item">📈 Reports</div>
+                    <div class="mockup-sidebar-item">⚙ Settings</div>
+                </div>
+                <div class="mockup-content">
+                    <div style="font-size:0.85rem;color:#fff;font-weight:600;margin-bottom:16px;">Sprint 24 — E-Commerce Platform</div>
+                    <div class="mockup-kanban">
+                        <div class="mockup-column">
+                            <div class="mockup-col-title blue">To Do (4)</div>
+                            <div class="mockup-card c-blue">Design system tokens</div>
+                            <div class="mockup-card c-green">API rate limiting</div>
+                            <div class="mockup-card c-orange">User onboarding flow</div>
+                        </div>
+                        <div class="mockup-column">
+                            <div class="mockup-col-title green">In Progress (3)</div>
+                            <div class="mockup-card c-blue">Checkout page refactor</div>
+                            <div class="mockup-card c-green">Payment integration</div>
+                            <div class="mockup-card c-orange">Search indexing</div>
+                        </div>
+                        <div class="mockup-column">
+                            <div class="mockup-col-title orange">Done (8)</div>
+                            <div class="mockup-card c-green">Auth module ✓</div>
+                            <div class="mockup-card c-blue">Database migration ✓</div>
+                            <div class="mockup-card c-orange">CI/CD pipeline ✓</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Logos -->
+<section class="logos">
+    <div class="container">
+        <div class="logos-label">Trusted by teams at</div>
+        <div class="logos-grid">
+            <div class="logo-placeholder">TechNova</div>
+            <div class="logo-placeholder">NuvemShop</div>
+            <div class="logo-placeholder">Stone</div>
+            <div class="logo-placeholder">QuintoAndar</div>
+            <div class="logo-placeholder">iFood</div>
+            <div class="logo-placeholder">Nubank</div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="features" id="features">
+    <div class="container">
+        <h2>Everything your team needs. Nothing it doesn't.</h2>
+        <p class="subtitle">Build projects your way with 6 powerful features — no manual required.</p>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon fi-blue">📋</div>
+                <h3>Kanban Boards</h3>
+                <p>Visualize your workflow. Drag, drop, and watch chaos turn into clarity. Custom columns, WIP limits, and swimlanes.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon fi-purple">📊</div>
+                <h3>Gantt Charts</h3>
+                <p>Plan timelines, manage dependencies, and keep every stakeholder aligned. Critical path detection included.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon fi-green">⏱</div>
+                <h3>Time Tracking</h3>
+                <p>Know exactly where hours go. Start a timer, tag tasks, and generate accurate timesheets automatically.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon fi-orange">📈</div>
+                <h3>One-Click Reports</h3>
+                <p>Velocity, burndown, cycle time — generated in seconds. Share with stakeholders as PDF or link.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon fi-pink">🔗</div>
+                <h3>50+ Integrations</h3>
+                <p>Slack, GitHub, GitLab, Jira, Google Drive, Figma, and more. Connect your existing stack in 2 clicks.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon fi-yellow">👥</div>
+                <h3>Real-Time Collab</h3>
+                <p>Mention teammates, leave comments, attach files — all within context. No more "did you see my message?"</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats -->
+<section class="stats">
+    <div class="container stats-grid">
+        <div>
+            <div class="stat-value">1,200+</div>
+            <div class="stat-label">Active Teams</div>
+        </div>
+        <div>
+            <div class="stat-value">6.2h</div>
+            <div class="stat-label">Saved per Week (avg)</div>
+        </div>
+        <div>
+            <div class="stat-value">98%</div>
+            <div class="stat-label">Setup in Under 2 Min</div>
+        </div>
+        <div>
+            <div class="stat-value">4.9/5</div>
+            <div class="stat-label">User Rating</div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing -->
+<section class="pricing" id="pricing">
+    <div class="container">
+        <h2>Simple, honest pricing</h2>
+        <p class="subtitle">14-day free trial. No credit card. Cancel anytime.</p>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <div class="pricing-name">Starter</div>
+                <div class="pricing-desc">For small teams getting started</div>
+                <div class="pricing-amount">R$29 <span>/mo</span></div>
+                <div class="pricing-period">per user, billed annually</div>
+                <ul class="pricing-features">
+                    <li>Up to 10 team members</li>
+                    <li>Kanban boards</li>
+                    <li>Basic reporting</li>
+                    <li>10 integrations</li>
+                    <li>Email support</li>
+                    <li>1 GB storage</li>
+                </ul>
+                <a href="#" class="btn btn-outline pricing-cta">Start Free Trial</a>
+            </div>
+            <div class="pricing-card popular">
+                <div class="pricing-name">Pro</div>
+                <div class="pricing-desc">For growing teams that need power</div>
+                <div class="pricing-amount">R$59 <span>/mo</span></div>
+                <div class="pricing-period">per user, billed annually</div>
+                <ul class="pricing-features">
+                    <li>Unlimited team members</li>
+                    <li>Kanban + Gantt + Timeline</li>
+                    <li>Advanced reporting & dashboards</li>
+                    <li>50+ integrations</li>
+                    <li>Time tracking</li>
+                    <li>Priority support (4h response)</li>
+                    <li>50 GB storage</li>
+                    <li>Custom workflows</li>
+                </ul>
+                <a href="#" class="btn btn-primary pricing-cta">Start Free Trial</a>
+            </div>
+            <div class="pricing-card">
+                <div class="pricing-name">Enterprise</div>
+                <div class="pricing-desc">For organizations with advanced needs</div>
+                <div class="pricing-amount">R$149 <span>/mo</span></div>
+                <div class="pricing-period">per user, billed annually</div>
+                <ul class="pricing-features">
+                    <li>Everything in Pro</li>
+                    <li>SSO & SAML authentication</li>
+                    <li>Advanced permissions & roles</li>
+                    <li>Audit logs</li>
+                    <li>Dedicated account manager</li>
+                    <li>SLA guarantee (99.99%)</li>
+                    <li>Unlimited storage</li>
+                    <li>API access & webhooks</li>
+                    <li>Custom onboarding</li>
+                </ul>
+                <a href="#" class="btn btn-outline pricing-cta">Contact Sales</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials" id="testimonials">
+    <div class="container">
+        <h2>Loved by teams everywhere</h2>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <div class="testimonial-text">"We replaced 4 different tools with TaskFlow. My engineering team finally has one source of truth. Sprint velocity went up 22% in the first month."</div>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar" style="background:linear-gradient(135deg,#00d4ff,#7b2cbf)">RM</div>
+                    <div>
+                        <div class="testimonial-name">Ricardo Mendes</div>
+                        <div class="testimonial-role">Engineering Manager, TechNova</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <div class="testimonial-text">"Setup took literally 90 seconds. We had our first project running before lunch. My team went from tool fatigue to tool joy."</div>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar" style="background:linear-gradient(135deg,#00e676,#00d4ff)">AS</div>
+                    <div>
+                        <div class="testimonial-name">Ana Silva</div>
+                        <div class="testimonial-role">Marketing Lead, StartupBR</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <div class="testimonial-text">"The reports alone are worth it. I used to spend 3 hours every Friday compiling status updates. Now it's one click. Absolute game-changer."</div>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar" style="background:linear-gradient(135deg,#ff9100,#f50057)">CF</div>
+                    <div>
+                        <div class="testimonial-name">Carlos Ferreira</div>
+                        <div class="testimonial-role">CTO, CloudBase</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+    <div class="container">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">Do I need a credit card to start?</div>
+                <div class="faq-answer">No. Start your 14-day free trial with just your email. No credit card required, no strings attached.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">How long does setup take?</div>
+                <div class="faq-answer">Most teams are up and running in under 2 minutes. Import from Monday, Asana, or Jira takes about 15 minutes with our migration tool.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Can I import data from my current tool?</div>
+                <div class="faq-answer">Yes. We support direct imports from Monday.com, Asana, Jira, Trello, and ClickUp. You can also import via CSV for any other tool.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">What happens after my trial ends?</div>
+                <div class="faq-answer">You can choose a paid plan or continue on our free tier (up to 5 users, 3 projects). Your data is never deleted — even if you cancel.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Is there a money-back guarantee?</div>
+                <div class="faq-answer">Yes. We offer a 30-day money-back guarantee on all paid plans. If TaskFlow isn't right for your team, we'll refund you — no questions asked.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Do you offer discounts for nonprofits or education?</div>
+                <div class="faq-answer">Absolutely. We offer 50% off for verified nonprofits and educational institutions. Contact us at hello@taskflow.io with proof of status.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Ready to make work <span>flow</span>?</h2>
+        <p>Join 1,200+ teams who've already ditched the chaos. Your free trial starts now.</p>
+        <a href="#" class="btn btn-primary" style="font-size:1.1rem; padding: 16px 40px;">Start Your Free Trial →</a>
+    </div>
+</section>
+
+<footer>
+    <div class="container footer-inner">
+        <div class="logo" style="font-size:1.2rem;"><span>Task</span>Flow</div>
+        <div class="footer-copy">&copy; 2026 TaskFlow Inc. All rights reserved.</div>
+        <div class="footer-links">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Support</a>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

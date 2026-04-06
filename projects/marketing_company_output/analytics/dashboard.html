@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow — Marketing Analytics Dashboard</title>
+    <style>
+        :root {
+            --bg-primary: #0d0d0d;
+            --bg-card: #16213e;
+            --bg-secondary: #1a1a2e;
+            --accent: #00d4ff;
+            --accent-green: #00e676;
+            --accent-orange: #ff9100;
+            --accent-red: #ff1744;
+            --accent-purple: #7b2cbf;
+            --accent-yellow: #ffd600;
+            --text-primary: #e0e0e0;
+            --text-secondary: #9e9e9e;
+            --text-heading: #ffffff;
+            --border: #2a2a4a;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        .container { max-width: 1300px; margin: 0 auto; padding: 0 24px; }
+
+        header {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .dash-title { font-size: 1.5rem; font-weight: 700; color: var(--text-heading); }
+        .dash-title span { color: var(--accent); }
+        .dash-meta { display: flex; gap: 24px; align-items: center; }
+        .dash-date { font-size: 0.85rem; color: var(--text-secondary); }
+        .dash-btn {
+            padding: 8px 16px; background: var(--bg-card); border: 1px solid var(--border);
+            color: var(--text-primary); border-radius: 6px; font-size: 0.85rem; cursor: pointer;
+        }
+        .dash-btn:hover { border-color: var(--accent); }
+
+        .section { padding: 32px 0; border-bottom: 1px solid var(--border); }
+        h2 {
+            font-size: 1.3rem; color: var(--text-heading); margin-bottom: 24px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        h2::before {
+            content: ''; width: 4px; height: 20px; background: var(--accent); border-radius: 2px;
+        }
+
+        .kpi-row {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px; margin-bottom: 32px;
+        }
+        .kpi {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+            padding: 20px; position: relative; overflow: hidden;
+        }
+        .kpi::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: var(--accent);
+        }
+        .kpi:nth-child(2)::after { background: var(--accent-green); }
+        .kpi:nth-child(3)::after { background: var(--accent-orange); }
+        .kpi:nth-child(4)::after { background: var(--accent-purple); }
+        .kpi:nth-child(5)::after { background: var(--accent-yellow); }
+        .kpi:nth-child(6)::after { background: var(--accent-red); }
+        .kpi-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .kpi-val { font-size: 1.6rem; font-weight: 700; color: var(--text-heading); }
+        .kpi-change { font-size: 0.78rem; margin-top: 4px; }
+        .kpi-change.up { color: var(--accent-green); }
+        .kpi-change.down { color: var(--accent-red); }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th {
+            background: var(--bg-secondary); color: var(--text-heading); padding: 12px 14px;
+            text-align: left; font-weight: 600; border-bottom: 2px solid var(--accent);
+        }
+        td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+        tr:hover td { background: rgba(0,212,255,0.03); }
+        .tbl-wrap { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+
+        .mini-bar-track { height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; min-width: 100px; }
+        .mini-bar-fill { height: 100%; border-radius: 4px; }
+        .bg-accent { background: var(--accent); }
+        .bg-green { background: var(--accent-green); }
+        .bg-orange { background: var(--accent-orange); }
+        .bg-purple { background: var(--accent-purple); }
+        .bg-yellow { background: var(--accent-yellow); }
+        .bg-red { background: var(--accent-red); }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 24px;
+        }
+        .card h3 { font-size: 1rem; color: var(--text-heading); margin-bottom: 16px; }
+
+        /* Funnel */
+        .funnel-vis { max-width: 600px; margin: 0 auto; }
+        .f-step {
+            margin: 0 auto 4px; padding: 14px; text-align: center; border-radius: 4px;
+            font-size: 0.9rem; color: var(--text-heading); font-weight: 600;
+        }
+        .f-sub { font-size: 0.78rem; color: var(--text-secondary); font-weight: 400; }
+
+        /* Bar chart */
+        .bchart { display: flex; align-items: flex-end; gap: 12px; height: 200px; padding-top: 16px; }
+        .bcol { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+        .bbar { width: 100%; max-width: 60px; border-radius: 6px 6px 0 0; position: relative; }
+        .bbar-val { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 0.72rem; color: var(--text-heading); white-space: nowrap; }
+        .blabel { font-size: 0.7rem; color: var(--text-secondary); text-align: center; }
+
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+        .tag-up { background: rgba(0,230,118,0.15); color: var(--accent-green); }
+        .tag-down { background: rgba(255,23,68,0.15); color: var(--accent-red); }
+
+        footer { padding: 24px 0; text-align: center; color: var(--text-secondary); font-size: 0.8rem; }
+        footer strong { color: var(--accent); }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .kpi-row { grid-template-columns: repeat(2,1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <div class="dash-title"><span>TaskFlow</span> Marketing Dashboard</div>
+            <div class="dash-meta">
+                <span class="dash-date">Period: Apr 1 – Apr 30, 2026</span>
+                <span class="dash-date">Updated: 2026-05-01 09:00</span>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <button class="dash-btn">Export CSV</button>
+            <button class="dash-btn">Last 30 Days ▾</button>
+        </div>
+    </header>
+
+    <!-- Top KPIs -->
+    <div class="section">
+        <h2>Top-Level KPIs</h2>
+        <div class="kpi-row">
+            <div class="kpi">
+                <div class="kpi-label">Total Website Visitors</div>
+                <div class="kpi-val">62,450</div>
+                <div class="kpi-change up">▲ 18.3% vs last month</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-label">Free Trial Signups</div>
+                <div class="kpi-val">3,120</div>
+                <div class="kpi-change up">▲ 24.5% vs last month</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-label">Paid Conversions</div>
+                <div class="kpi-val">684</div>
+                <div class="kpi-change up">▲ 31.2% vs last month</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-label">MRR</div>
+                <div class="kpi-val">R$52K</div>
+                <div class="kpi-change up">▲ 28.0% vs last month</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-label">CAC (Blended)</div>
+                <div class="kpi-val">R$41</div>
+                <div class="kpi-change up">▼ 12.8% (lower is better)</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-label">Churn Rate</div>
+                <div class="kpi-val">7.2%</div>
+                <div class="kpi-change down">▲ 1.1pp vs last month</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Channel Performance -->
+    <div class="section">
+        <h2>Channel Performance</h2>
+        <div class="tbl-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Channel</th>
+                        <th>Spend</th>
+                        <th>Impressions</th>
+                        <th>Clicks</th>
+                        <th>CTR</th>
+                        <th>Conversions</th>
+                        <th>CPA</th>
+                        <th>ROAS</th>
+                        <th>Trend</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Instagram Ads</strong></td>
+                        <td>R$17,500</td>
+                        <td>320,000</td>
+                        <td>8,960</td>
+                        <td>2.8%</td>
+                        <td>312</td>
+                        <td>R$56</td>
+                        <td>3.8x</td>
+                        <td><span class="tag tag-up">↑ 15%</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>LinkedIn Ads</strong></td>
+                        <td>R$12,500</td>
+                        <td>145,000</td>
+                        <td>5,075</td>
+                        <td>3.5%</td>
+                        <td>189</td>
+                        <td>R$66</td>
+                        <td>2.9x</td>
+                        <td><span class="tag tag-up">↑ 8%</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Google Search</strong></td>
+                        <td>R$23,000</td>
+                        <td>190,000</td>
+                        <td>11,400</td>
+                        <td>6.0%</td>
+                        <td>412</td>
+                        <td>R$56</td>
+                        <td>4.2x</td>
+                        <td><span class="tag tag-up">↑ 22%</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Meta Retargeting</strong></td>
+                        <td>R$8,000</td>
+                        <td>52,000</td>
+                        <td>2,600</td>
+                        <td>5.0%</td>
+                        <td>145</td>
+                        <td>R$55</td>
+                        <td>5.1x</td>
+                        <td><span class="tag tag-up">↑ 12%</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Organic / SEO</strong></td>
+                        <td>R$10,000</td>
+                        <td>—</td>
+                        <td>18,200</td>
+                        <td>—</td>
+                        <td>890</td>
+                        <td>R$11</td>
+                        <td>12.4x</td>
+                        <td><span class="tag tag-up">↑ 45%</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>YouTube</strong></td>
+                        <td>R$6,000</td>
+                        <td>185,000</td>
+                        <td>3,700</td>
+                        <td>2.0%</td>
+                        <td>82</td>
+                        <td>R$73</td>
+                        <td>2.1x</td>
+                        <td><span class="tag tag-down">↓ 3%</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Email</strong></td>
+                        <td>R$4,000</td>
+                        <td>15,200 sent</td>
+                        <td>3,040</td>
+                        <td>20.0%</td>
+                        <td>235</td>
+                        <td>R$17</td>
+                        <td>15.8x</td>
+                        <td><span class="tag tag-up">↑ 38%</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Conversion Rates + Funnel -->
+    <div class="section">
+        <div class="grid-2">
+            <div class="card">
+                <h3>Conversion Rates by Stage</h3>
+                <table>
+                    <thead><tr><th>Stage</th><th>Count</th><th>Rate</th></tr></thead>
+                    <tbody>
+                        <tr><td>Impressions</td><td>892,000</td><td>—</td></tr>
+                        <tr><td>Website Visitors</td><td>62,450</td><td>7.0%</td></tr>
+                        <tr><td>Free Trial Signups</td><td>3,120</td><td>5.0%</td></tr>
+                        <tr><td>Activated (1+ project)</td><td>1,870</td><td>60%</td></tr>
+                        <tr><td>Paid Subscribers</td><td>684</td><td>36.6%</td></tr>
+                        <tr><td>Blended Conversion</td><td>684 from 62,450</td><td><strong>1.1%</strong></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Funnel Visualization</h3>
+                <div class="funnel-vis">
+                    <div class="f-step" style="width:100%;background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.3)">
+                        Impressions — 892K
+                        <div class="f-sub">All paid + organic</div>
+                    </div>
+                    <div class="f-step" style="width:82%;background:rgba(123,44,191,0.12);border:1px solid rgba(123,44,191,0.3)">
+                        Website Visits — 62,450
+                        <div class="f-sub">7.0% from impression</div>
+                    </div>
+                    <div class="f-step" style="width:62%;background:rgba(0,230,118,0.12);border:1px solid rgba(0,230,118,0.3)">
+                        Trial Signups — 3,120
+                        <div class="f-sub">5.0% visit-to-trial</div>
+                    </div>
+                    <div class="f-step" style="width:48%;background:rgba(255,145,0,0.12);border:1px solid rgba(255,145,0,0.3)">
+                        Activated Users — 1,870
+                        <div class="f-sub">60% activation rate</div>
+                    </div>
+                    <div class="f-step" style="width:35%;background:rgba(255,214,0,0.12);border:1px solid rgba(255,214,0,0.3)">
+                        Paid Customers — 684
+                        <div class="f-sub">36.6% trial-to-paid</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROI by Campaign + Monthly Comparison -->
+    <div class="section">
+        <div class="grid-2">
+            <div class="card">
+                <h3>ROI by Campaign</h3>
+                <table>
+                    <thead><tr><th>Campaign</th><th>Spend</th><th>Revenue</th><th>ROI</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>Launch Week Blitz</td>
+                            <td>R$18,000</td>
+                            <td>R$82,800</td>
+                            <td><strong style="color:var(--accent-green)">4.6x</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Competitor Conquest</td>
+                            <td>R$10,000</td>
+                            <td>R$38,000</td>
+                            <td><strong style="color:var(--accent-green)">3.8x</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Retargeting (Meta)</td>
+                            <td>R$8,000</td>
+                            <td>R$40,800</td>
+                            <td><strong style="color:var(--accent-green)">5.1x</strong></td>
+                        </tr>
+                        <tr>
+                            <td>SEO Content Program</td>
+                            <td>R$10,000</td>
+                            <td>R$124,000</td>
+                            <td><strong style="color:var(--accent-green)">12.4x</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Email Nurture</td>
+                            <td>R$4,000</td>
+                            <td>R$63,200</td>
+                            <td><strong style="color:var(--accent-green)">15.8x</strong></td>
+                        </tr>
+                        <tr>
+                            <td>YouTube Demos</td>
+                            <td>R$6,000</td>
+                            <td>R$12,600</td>
+                            <td><strong style="color:var(--accent-orange)">2.1x</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Webinar / Events</td>
+                            <td>R$4,000</td>
+                            <td>R$18,000</td>
+                            <td><strong style="color:var(--accent-green)">4.5x</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Monthly Comparison (MRR)</h3>
+                <div class="bchart">
+                    <div class="bcol">
+                        <div class="bbar" style="height:30px;background:linear-gradient(to top,var(--accent),transparent);">
+                            <div class="bbar-val">R$15K</div>
+                        </div>
+                        <div class="blabel">Nov</div>
+                    </div>
+                    <div class="bcol">
+                        <div class="bbar" style="height:45px;background:linear-gradient(to top,var(--accent),transparent);">
+                            <div class="bbar-val">R$22K</div>
+                        </div>
+                        <div class="blabel">Dec</div>
+                    </div>
+                    <div class="bcol">
+                        <div class="bbar" style="height:55px;background:linear-gradient(to top,var(--accent),var(--accent-purple));">
+                            <div class="bbar-val">R$28K</div>
+                        </div>
+                        <div class="blabel">Jan</div>
+                    </div>
+                    <div class="bcol">
+                        <div class="bbar" style="height:70px;background:linear-gradient(to top,var(--accent),var(--accent-purple));">
+                            <div class="bbar-val">R$36K</div>
+                        </div>
+                        <div class="blabel">Feb</div>
+                    </div>
+                    <div class="bcol">
+                        <div class="bbar" style="height:85px;background:linear-gradient(to top,var(--accent-purple),var(--accent-green));">
+                            <div class="bbar-val">R$41K</div>
+                        </div>
+                        <div class="blabel">Mar</div>
+                    </div>
+                    <div class="bcol">
+                        <div class="bbar" style="height:110px;background:var(--accent-green);">
+                            <div class="bbar-val">R$52K</div>
+                        </div>
+                        <div class="blabel">Apr</div>
+                    </div>
+                    <div class="bcol">
+                        <div class="bbar" style="height:150px;background:linear-gradient(to top,var(--accent-green),var(--accent));opacity:0.5;">
+                            <div class="bbar-val">R$75K*</div>
+                        </div>
+                        <div class="blabel">May*</div>
+                    </div>
+                </div>
+                <p style="font-size:0.72rem;color:var(--text-secondary);margin-top:12px;">* Projected based on current trends</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Performance + SEO -->
+    <div class="section">
+        <div class="grid-2">
+            <div class="card">
+                <h3>Top Content (April)</h3>
+                <table>
+                    <thead><tr><th>Content</th><th>Views</th><th>Signups</th><th>Conv.</th></tr></thead>
+                    <tbody>
+                        <tr><td>Blog: Best PM Software 2026</td><td>12,400</td><td>245</td><td>2.0%</td></tr>
+                        <tr><td>Landing Page (Home)</td><td>38,200</td><td>1,150</td><td>3.0%</td></tr>
+                        <tr><td>Blog: Free PM Templates</td><td>8,900</td><td>178</td><td>2.0%</td></tr>
+                        <tr><td>YT: TaskFlow 5min Tour</td><td>6,200</td><td>93</td><td>1.5%</td></tr>
+                        <tr><td>Blog: Kanban vs Gantt</td><td>5,800</td><td>87</td><td>1.5%</td></tr>
+                        <tr><td>YT: vs Monday.com</td><td>4,100</td><td>118</td><td>2.9%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>SEO Keyword Rankings</h3>
+                <table>
+                    <thead><tr><th>Keyword</th><th>Position</th><th>Change</th><th>Volume</th></tr></thead>
+                    <tbody>
+                        <tr><td>best project management software</td><td>7</td><td><span class="tag tag-up">↑3</span></td><td>45K</td></tr>
+                        <tr><td>kanban vs gantt</td><td>4</td><td><span class="tag tag-up">↑5</span></td><td>18K</td></tr>
+                        <tr><td>free project management templates</td><td>3</td><td><span class="tag tag-up">↑8</span></td><td>22K</td></tr>
+                        <tr><td>taskflow project management</td><td>1</td><td><span class="tag tag-up">↑2</span></td><td>2K</td></tr>
+                        <tr><td>monday.com alternative</td><td>6</td><td><span class="tag tag-up">↑4</span></td><td>8K</td></tr>
+                        <tr><td>reduce context switching work</td><td>2</td><td><span class="tag tag-up">↑6</span></td><td>8K</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget vs Actual -->
+    <div class="section">
+        <h2>Budget Utilization</h2>
+        <div class="tbl-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Channel</th>
+                        <th>Budget</th>
+                        <th>Actual Spend</th>
+                        <th>Utilization</th>
+                        <th>Bar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Instagram Ads</td>
+                        <td>R$17,500</td>
+                        <td>R$17,200</td>
+                        <td>98%</td>
+                        <td><div class="mini-bar-track"><div class="mini-bar-fill bg-accent" style="width:98%"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td>LinkedIn Ads</td>
+                        <td>R$12,500</td>
+                        <td>R$12,500</td>
+                        <td>100%</td>
+                        <td><div class="mini-bar-track"><div class="mini-bar-fill bg-purple" style="width:100%"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td>Google Ads</td>
+                        <td>R$23,000</td>
+                        <td>R$23,400</td>
+                        <td>102%</td>
+                        <td><div class="mini-bar-track"><div class="mini-bar-fill bg-green" style="width:100%"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td>Meta Retargeting</td>
+                        <td>R$8,000</td>
+                        <td>R$7,800</td>
+                        <td>97%</td>
+                        <td><div class="mini-bar-track"><div class="mini-bar-fill bg-orange" style="width:97%"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td>Blog / SEO</td>
+                        <td>R$10,000</td>
+                        <td>R$9,500</td>
+                        <td>95%</td>
+                        <td><div class="mini-bar-track"><div class="mini-bar-fill bg-yellow" style="width:95%"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td>YouTube</td>
+                        <td>R$6,000</td>
+                        <td>R$6,000</td>
+                        <td>100%</td>
+                        <td><div class="mini-bar-track"><div class="mini-bar-fill bg-accent" style="width:100%"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td>R$4,000</td>
+                        <td>R$3,600</td>
+                        <td>90%</td>
+                        <td><div class="mini-bar-track"><div class="mini-bar-fill bg-purple" style="width:90%"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total</strong></td>
+                        <td><strong>R$81,000</strong></td>
+                        <td><strong>R$80,000</strong></td>
+                        <td><strong>99%</strong></td>
+                        <td><div class="mini-bar-track"><div class="mini-bar-fill bg-green" style="width:99%"></div></div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        Generated by <strong>MYC Marketing Agency</strong> | Data refreshed daily from Google Analytics, Meta Ads Manager, Google Ads, and Stripe.
+    </div>
+</footer>
+
+</body>
+</html>

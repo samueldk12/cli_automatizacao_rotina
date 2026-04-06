@@ -1,0 +1,290 @@
+[
+  {
+    "id": 1,
+    "date": "2026-04-06",
+    "platform": "Instagram",
+    "type": "carousel",
+    "caption": "5 reasons your team is bleeding hours every week — and how to plug the leak. Swipe to see what's costing you time right now. 👉",
+    "hashtags": ["#TaskFlow", "#ProjectManagement", "#WorkSmarter", "#Productivity", "#SaaS"],
+    "visual_brief": "5 carousel slides. Each slide: one pain point with icon + stat. Dark background with brand blue accent. Last slide has TaskFlow logo + CTA 'Find your free trial in bio'"
+  },
+  {
+    "id": 2,
+    "date": "2026-04-06",
+    "platform": "LinkedIn",
+    "type": "post",
+    "caption": "Meet TaskFlow. We built it because we lived the chaos: 14 browser tabs, 3 messaging apps, and still missing deadlines. It's time for one place where work actually flows. Launch week starts Monday. Are you watching? 🚀",
+    "hashtags": ["#TaskFlow", "#SaaS", "#ProjectManagement", "#Startup", "#Productivity"],
+    "visual_brief": "Clean product mockup of TaskFlow dashboard on laptop screen. Dark theme visible. TaskFlow logo in corner. Professional photo style"
+  },
+  {
+    "id": 3,
+    "date": "2026-04-07",
+    "platform": "Instagram",
+    "type": "reel",
+    "caption": "POV: You finally stop using 5 different apps to manage one project. 😮‍💨✨ This tool changed how our team works. Link in bio. #TaskFlow",
+    "hashtags": ["#TaskFlow", "#ProductivityHack", "#WorkSmarter", "#PMTools", "#RemoteWork"],
+    "visual_brief": "30-second screen recording. Fast cuts: closing multiple tabs → opening TaskFlow → clean dashboard. Upbeat trending audio overlay"
+  },
+  {
+    "id": 4,
+    "date": "2026-04-07",
+    "platform": "Twitter",
+    "type": "poll",
+    "caption": "What's the WORST project management tool you've been forced to use? We're all ears 👀",
+    "hashtags": [],
+    "visual_brief": "Text-based poll with TaskFlow branding. 4 options: Spreadsheets, Email chains, Post-it notes on wall, That one tool nobody knows how to use"
+  },
+  {
+    "id": 5,
+    "date": "2026-04-08",
+    "platform": "LinkedIn",
+    "type": "article",
+    "caption": "The Future of Project Management: Why Spreadsheets Are Finally Dying. We analyzed 2,000 teams and found something surprising about how the best ones actually work. Read the full article.",
+    "hashtags": ["#ProjectManagement", "#FutureOfWork", "#DigitalTransformation"],
+    "visual_brief": "LinkedIn article header. Bold headline graphic with data visualization background. TaskFlow branding at bottom"
+  },
+  {
+    "id": 6,
+    "date": "2026-04-08",
+    "platform": "YouTube",
+    "type": "video",
+    "caption": "TaskFlow in 5 Minutes — Complete Product Tour for New Teams. See every core feature: Kanban, Gantt, time tracking, reporting, and integrations. No fluff, just how it works.",
+    "hashtags": ["#TaskFlow", "#ProductTour", "#ProjectManagement", "#SaaS"],
+    "visual_brief": "5-minute screen recording with voiceover. Professional intro with TaskFlow logo animation. Chapters: 0:00 Intro, 0:30 Dashboard, 1:30 Kanban, 2:30 Gantt, 3:30 Reports, 4:30 Integrations"
+  },
+  {
+    "id": 7,
+    "date": "2026-04-09",
+    "platform": "Instagram",
+    "type": "story",
+    "caption": "Behind the scenes: Our dev team shipping TaskFlow v1.0 🛠️ (Poll: Which feature are you most excited about?)",
+    "hashtags": [],
+    "visual_brief": "Casual photo of dev team at whiteboard. Add Instagram poll sticker: 'Kanban boards' vs 'Gantt charts'. TaskFlow sticker linking to website"
+  },
+  {
+    "id": 8,
+    "date": "2026-04-09",
+    "platform": "Facebook",
+    "type": "post",
+    "caption": "Free Template Friday! Grab our most popular project templates — completely free. Sprint planning, content calendar, product roadmap, and more. Which one does your team need first?",
+    "hashtags": ["#FreeTemplates", "#ProjectManagement", "#TaskFlow"],
+    "visual_brief": "Grid of 6 template thumbnails in TaskFlow dark theme. Download CTA button. Clean, organized layout"
+  },
+  {
+    "id": 9,
+    "date": "2026-04-10",
+    "platform": "Instagram",
+    "type": "reel",
+    "caption": "Day in the life of a PM who actually leaves work on time. Thank you, TaskFlow. ⏰🏠",
+    "hashtags": ["#DayInTheLife", "#ProjectManager", "#WorkLifeBalance", "#TaskFlow"],
+    "visual_brief": "Relatable reel showing PM closing laptop at 5:30pm with smile. Before/after split screen: stressed PM vs relaxed PM. Trending audio"
+  },
+  {
+    "id": 10,
+    "date": "2026-04-10",
+    "platform": "Twitter",
+    "type": "thread",
+    "caption": "Best project management practices for 2026 — a thread 🧵\n\n1/ Stop treating every task as urgent. Start prioritizing by impact, not noise.",
+    "hashtags": ["#PM", "#Productivity"],
+    "visual_brief": "8-tweet thread. Each tweet has a specific practice. Include 1 TaskFlow screenshot as example in tweet 5. End with CTA link"
+  },
+  {
+    "id": 11,
+    "date": "2026-04-13",
+    "platform": "Instagram",
+    "type": "carousel",
+    "caption": "Kanban vs Gantt — which one does YOUR team actually need? We break it down in 5 slides. Spoiler: you probably need both. 😉",
+    "hashtags": ["#Kanban", "#Gantt", "#Agile", "#ProjectManagement", "#TaskFlow"],
+    "visual_brief": "5 slides comparing Kanban vs Gantt visually. Side-by-side screenshots. Clean comparison table on slide 5. Brand gradient header"
+  },
+  {
+    "id": 12,
+    "date": "2026-04-13",
+    "platform": "LinkedIn",
+    "type": "post",
+    "caption": "Case Study: How 'TechNova Solutions' went from 45-hour work weeks to 35 hours — without shipping less. They switched to TaskFlow 30 days ago. Here's the data.",
+    "hashtags": ["#CaseStudy", "#Productivity", "#SaaS", "#TaskFlow"],
+    "visual_brief": "Infographic-style post showing before/after metrics: 45h→35h work week, 28% fewer missed deadlines, 41% faster sprints. Client logo + TaskFlow logo"
+  },
+  {
+    "id": 13,
+    "date": "2026-04-14",
+    "platform": "Instagram",
+    "type": "reel",
+    "caption": "Quick tip: Set up recurring tasks in 10 seconds ⏱️ Watch this.",
+    "hashtags": ["#TaskFlow", "#QuickTip", "#ProductivityHack", "#Automation"],
+    "visual_brief": "Screen recording at 2x speed showing the recurring task setup. Green checkmark animation at end. '10 seconds' timer overlay"
+  },
+  {
+    "id": 14,
+    "date": "2026-04-14",
+    "platform": "LinkedIn",
+    "type": "post",
+    "caption": "We're hiring! TaskFlow is looking for passionate people to join our growing team. Open roles: Frontend Engineer, Customer Success Manager, Content Marketing Lead. Apply through the link in comments!",
+    "hashtags": ["#Hiring", "#RemoteJobs", "#SaaSCareers", "#TaskFlow"],
+    "visual_brief": "Team photo with 'We're Hiring' banner. Clean design with TaskFlow branding. List of open positions in the image"
+  },
+  {
+    "id": 15,
+    "date": "2026-04-15",
+    "platform": "Facebook",
+    "type": "event",
+    "caption": "Join us LIVE for 'Project Management Mastery' — a free webinar with our Head of Product. We'll cover: agile best practices, common PM mistakes, and a live TaskFlow demo. Register now!",
+    "hashtags": ["#Webinar", "#PM", "#FreeEvent", "#TaskFlow"],
+    "visual_brief": "Event cover image: speaker photo + topic list + date/time + registration CTA. Professional design with TaskFlow blue overlay"
+  },
+  {
+    "id": 16,
+    "date": "2026-04-16",
+    "platform": "Instagram",
+    "type": "story",
+    "caption": "What's your most-used feature in TaskFlow? Vote below! 👇",
+    "hashtags": [],
+    "visual_brief": "Instagram poll with 4 options on branded background: Kanban, Gantt, Reports, Time Tracking. Swipe-up link to feature page"
+  },
+  {
+    "id": 17,
+    "date": "2026-04-16",
+    "platform": "Twitter",
+    "type": "post",
+    "caption": "\"Productivity is never an accident.\" — Peter Drucker\n\nTaskFlow makes the accidental part accidental-free. 😏",
+    "hashtags": ["#TaskFlow", "#Quote", "#Productivity"],
+    "visual_brief": "Clean quote card with Peter Drucker quote. TaskFlow logo watermark at bottom. Brand gradient background"
+  },
+  {
+    "id": 18,
+    "date": "2026-04-20",
+    "platform": "YouTube",
+    "type": "video",
+    "caption": "TaskFlow vs Monday.com — Honest Comparison (2026). Same project, same features side by side. No sponsor bias. You decide.",
+    "hashtags": ["#TaskFlow", "#MondayComparison", "#PMTools", "#SaaS"],
+    "visual_brief": "Split screen comparison video. 10 minutes. Chapters for each feature category. Honest pros/cons for both. End with TaskFlow trial CTA"
+  },
+  {
+    "id": 19,
+    "date": "2026-04-21",
+    "platform": "LinkedIn",
+    "type": "poll",
+    "caption": "What frustrates you MOST about your current project management tool? We're building TaskFlow 2.0 and want your input.",
+    "hashtags": ["#PM", "#Feedback", "#SaaS"],
+    "visual_brief": "LinkedIn poll format. 4 options: Too expensive, Too complex, Bad mobile app, Poor integrations. Branded with TaskFlow avatar"
+  },
+  {
+    "id": 20,
+    "date": "2026-04-22",
+    "platform": "Instagram",
+    "type": "carousel",
+    "caption": "7 TaskFlow features you probably didn't know existed 🤫 Swipe to find your new favorite.",
+    "hashtags": ["#TaskFlow", "#HiddenFeatures", "#Productivity", "#SaaS"],
+    "visual_brief": "7 slides, each showcasing one hidden feature with mini tutorial. Clean UI screenshots with numbered labels. Last slide: 'Which surprised you most?' engagement prompt"
+  },
+  {
+    "id": 21,
+    "date": "2026-04-23",
+    "platform": "Twitter",
+    "type": "thread",
+    "caption": "We just released 10 FREE project management templates for TaskFlow. Here's what's inside and how to grab them 🧵",
+    "hashtags": ["#FreeResources", "#Templates", "#TaskFlow"],
+    "visual_brief": "Thread with template previews. Each tweet describes one template. Link in final tweet. Template thumbnails as images"
+  },
+  {
+    "id": 22,
+    "date": "2026-04-24",
+    "platform": "Instagram",
+    "type": "reel",
+    "caption": "Real customer, real results. Maria from @StartupBR shares how TaskFlow cut her team's meeting time in half. 🎯",
+    "hashtags": ["#CustomerTestimonial", "#TaskFlow", "#Startup", "#Results"],
+    "visual_brief": "15-second testimonial clip. Maria talking to camera in office setting. Subtitle overlay. TaskFlow logo + 'Start free trial' at end"
+  },
+  {
+    "id": 23,
+    "date": "2026-04-27",
+    "platform": "Instagram",
+    "type": "story",
+    "caption": "AMA with our CTO Diego: Ask anything about TaskFlow, our stack, or building a SaaS in Brazil! 🇧🇷",
+    "hashtags": [],
+    "visual_brief": "AMA question sticker on TaskFlow background. Diego's photo. '24h to ask — answers posted tomorrow' tag"
+  },
+  {
+    "id": 24,
+    "date": "2026-04-28",
+    "platform": "LinkedIn",
+    "type": "article",
+    "caption": "Remote Work & Async Collaboration: The New Normal Is Already Here. How distributed teams are outperforming office-only teams by 31%. Data-driven insights inside.",
+    "hashtags": ["#RemoteWork", "#AsyncWork", "#FutureOfWork"],
+    "visual_brief": "Article with charts and data. Header image showing remote team collaboration. Professional infographic style"
+  },
+  {
+    "id": 25,
+    "date": "2026-04-29",
+    "platform": "Instagram",
+    "type": "carousel",
+    "caption": "Integration Spotlight: TaskFlow + Slack 🤝 Everything you can do with our Slack integration, explained in 5 slides.",
+    "hashtags": ["#SlackIntegration", "#TaskFlow", "#Productivity"],
+    "visual_brief": "5 slides: 1) Slack integration header, 2-4) Key features with screenshots, 5) CTA 'Connect your workspace'. Brand + Slack logo combo"
+  },
+  {
+    "id": 26,
+    "date": "2026-04-30",
+    "platform": "Facebook",
+    "type": "post",
+    "caption": "Weekly Productivity Roundup! 📊 This week's top tips: 1) The 2-minute rule, 2) Time-blocking for deep work, 3) End-of-week reviews. Which one will you try?",
+    "hashtags": ["#ProductivityTips", "#TaskFlow", "#WeeklyTips"],
+    "visual_brief": "Three-panel graphic with numbered tips. Each tip has icon + brief explanation. Clean, shareable design. TaskFlow branding at bottom"
+  },
+  {
+    "id": 27,
+    "date": "2026-05-01",
+    "platform": "YouTube",
+    "type": "video",
+    "caption": "How to Set Up Your First Sprint in TaskFlow — 2 Minutes. Complete walkthrough for agile teams starting fresh.",
+    "hashtags": ["#SprintPlanning", "#Agile", "#TaskFlow", "#Tutorial"],
+    "visual_brief": "2-minute fast-paced tutorial. Timer countdown at corner. Clear step numbers. End screen with 'Create your first sprint' CTA"
+  },
+  {
+    "id": 28,
+    "date": "2026-05-04",
+    "platform": "Instagram",
+    "type": "reel",
+    "caption": "POV: Your team finally uses ONE tool instead of five. Peace has been achieved. 🕊️",
+    "hashtags": ["#TaskFlow", "#POV", "#RelatableContent", "#OneTool"],
+    "visual_brief": "Relatable meme-style reel. Person relaxing in chair while chaos icons (multiple app logos) get swept away. Calm music. Humorous tone"
+  },
+  {
+    "id": 29,
+    "date": "2026-05-05",
+    "platform": "LinkedIn",
+    "type": "post",
+    "caption": "The numbers don't lie: Companies using centralized PM tools see 34% higher project completion rates. Here's the 2026 PM benchmarking report we compiled from 2,000 teams. Download free.",
+    "hashtags": ["#PMBenchmarks", "#Data", "#TaskFlow"],
+    "visual_brief": "Data report cover image with key stat highlighted. Professional corporate design. Download link in first comment"
+  },
+  {
+    "id": 30,
+    "date": "2026-05-06",
+    "platform": "Twitter",
+    "type": "thread",
+    "caption": "Our open-source PM toolkit just hit 1,000 stars on GitHub! Here's what's included and why we did it 🧵⭐",
+    "hashtags": ["#OpenSource", "#GitHub", "#TaskFlow"],
+    "visual_brief": "Thread showcasing open-source tools. Repo screenshots. Each tool with description. Link to GitHub in final tweet"
+  },
+  {
+    "id": 31,
+    "date": "2026-05-07",
+    "platform": "Instagram",
+    "type": "carousel",
+    "caption": "Before TaskFlow vs After TaskFlow — a visual story you'll relate to. We promise it's not just us 😅",
+    "hashtags": ["#BeforeAfter", "#TaskFlow", "#Transformation"],
+    "visual_brief": "4 before/after pairs as carousel slides. 1) Desk: papers everywhere vs clean dashboard. 2) Calendar: conflicting vs organized. 3) Chat: 100+ unread vs resolved. 4) Mood: stressed vs smiling"
+  },
+  {
+    "id": 32,
+    "date": "2026-05-08",
+    "platform": "Facebook",
+    "type": "post",
+    "caption": "Feature Friday: Custom Dashboards 🎨 Build the view your team actually needs. Drag, drop, done. Check out these examples from real users.",
+    "hashtags": ["#FeatureFriday", "#TaskFlow", "#CustomDashboard"],
+    "visual_brief": "Showcase 3-4 user dashboard examples. Annotated with callouts. Clean layout showing drag-and-drop simplicity. TaskFlow branding"
+  }
+]
