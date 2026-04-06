@@ -313,14 +313,59 @@ def execute_plan(plan: dict, company_id: str | None = None,
     return report
 
 
+def _call_llm_api(
+    prompt: str,
+    env_vars: dict,
+    timeout: int = 120,
+) -> str:
+    """Chama o LLM diretamente via API OpenAI-compatible.
+
+    Usa as mesmas env vars que o openclaude configuraria:
+      - OPENAI_BASE_URL (ex: openrouter.ai/api/v1)
+      - OPENAI_API_KEY
+      - OPENAI_MODEL
+    """
+    base_url = env_vars.get("OPENAI_BASE_URL", os.environ.get("OPENAI_BASE_URL", ""))
+    api_key = env_vars.get("OPENAI_API_KEY", os.environ.get("OPENAI_API_KEY", ""))
+    model = env_vars.get("OPENAI_MODEL", os.environ.get("OPENAI_MODEL", "gpt-4o"))
+
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY nao configurado")
+
+    # Garante que a URL termina com /v1
+    if base_url and not base_url.endswith("/v1"):
+        base_url = base_url.rstrip("/") + "/v1"
+    elif base_url:
+        pass  # ja tem /v1
+    else:
+        base_url = "https://api.openai.com/v1"
+
+    import requests
+    url = f"{base_url}/chat/completions"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 8000,
+        "temperature": 0.7,
+    }
+
+    resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
+    resp.raise_for_status()
+    data = resp.json()
+    return data["choices"][0]["message"]["content"]
+
+
 def _dispatch_agent(context: str, query: str,
                     company_id: str | None,
                     dept_name: str,
                     agent_key: str) -> dict:
-    """Despacha um agente com o contexto dado, captura output via --print."""
-    from myc.agent import _load_agents, _find_command, launch_agent
+    """Despacha um agente com o contexto dado, usando API direta."""
+    from myc.agent import _load_agents
     from myc.company_memory import save as mem_save
-    import subprocess
 
     agents = _load_agents()
     if "default" not in agents:
@@ -328,8 +373,6 @@ def _dispatch_agent(context: str, query: str,
         return {"status": "no_agent", "skipped": True}
 
     agent = agents["default"]
-    cwd = agent.get("cwd") or str(Path.cwd())
-    platform = agent.get("platform", "openclaude")
     env_vars = dict(agent.get("env", {}))
 
     # Monta o prompt completo para o LLM
@@ -342,74 +385,35 @@ def _dispatch_agent(context: str, query: str,
         f"memoria da empresa para uso de outros departamentos."
     )
 
-    console.print(f"\n  [dim]Enviando prompt ({len(full_prompt)} chars) ao agente...[/dim]")
-
-    # Tenta modo headless --print
-    claude_cmd = _find_command("claude")
-    if claude_cmd and claude_cmd.endswith((".cmd", ".bat")):
-        # Build env
-        env = os.environ.copy()
-        env.update(env_vars)
-
-        console.print(f"  [dim]Executando em modo headless (--print)...[/dim]")
-        try:
-            result = subprocess.run(
-                ["cmd.exe", "/c", claude_cmd, "-p", full_prompt],
-                env=env,
-                cwd=str(Path(cwd)),
-                capture_output=True,
-                text=True,
-                timeout=120,
-                encoding="utf-8",
-                errors="replace",
-            )
-            output = (result.stdout + result.stderr).strip()
-
-            if output and result.returncode == 0:
-                # Salva output real na memoria
-                if company_id:
-                    mem_save(
-                        company_id,
-                        f"{dept_name}_{agent_key}_output",
-                        output,
-                        dept=dept_name,
-                        source=agent_key,
-                    )
-                console.print(f"  [dim]Output capturado: {len(output)} chars[/dim]")
-                # Mostra preview
-                preview = output[:300]
-                console.print(f"  [dim]Preview: {preview}{'...' if len(output) > 300 else ''}[/dim]")
-                return {"status": "completed", "exit_code": 0, "output": output}
-        except subprocess.TimeoutExpired:
-            console.print(f"  [yellow]Timeout no modo headless, tentando modo interativo...[/yellow]")
-        except Exception as e:
-            console.print(f"  [yellow]Erro no modo headless: {e}[/yellow]")
-
-    # Fallback: modo interativo (sem captura de output)
-    console.print(f"  [yellow]Usando modo interativo (fallback)[/yellow]")
-    backup_path = Path(cwd) / "CLAUDE.md"
-    backup = None
-    if backup_path.exists():
-        backup = backup_path.read_text(encoding="utf-8")
-
-    md_path = backup_path
-    md_path.write_text(full_prompt, encoding="utf-8")
+    console.print(f"\n  [dim]Chamando API ({len(full_prompt)} chars)...[/dim]")
 
     try:
-        rc = launch_agent(agent["name"], cwd=cwd)
-    finally:
-        if backup is not None:
-            md_path.write_text(backup, encoding="utf-8")
-        else:
-            md_path.unlink(missing_ok=True)
+        start = datetime.now()
+        output = _call_llm_api(full_prompt, env_vars, timeout=120)
+        elapsed = (datetime.now() - start).total_seconds()
+        console.print(f"  [dim]Resposta recebida: {len(output)} chars ({elapsed:.1f}s)[/dim]")
 
-    if company_id and rc == 0:
-        mem_save(
-            company_id,
-            f"{dept_name}_{agent_key}_output",
-            f"Agente {agent_key} executou em modo interativo. Verifique relatorio HTML para detalhes.",
-            dept=dept_name,
-            source=agent_key,
-        )
+        # Preview
+        preview = output[:300]
+        console.print(f"  [dim]Preview: {preview}{'...' if len(output) > 300 else ''}[/dim]")
 
-    return {"status": "completed" if rc == 0 else "failed", "exit_code": rc}
+        # Salva output real na memoria
+        if company_id and output:
+            mem_save(
+                company_id,
+                f"{dept_name}_{agent_key}_output",
+                output,
+                dept=dept_name,
+                source=agent_key,
+            )
+
+        return {
+            "status": "completed",
+            "exit_code": 0,
+            "output": output,
+            "elapsed_s": round(elapsed, 1),
+        }
+
+    except Exception as e:
+        console.print(f"  [red]Erro ao chamar API: {e}[/red]")
+        return {"status": "failed", "error": str(e), "exit_code": 1}
