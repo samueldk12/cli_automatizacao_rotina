@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advocacia BR - MYC Report</title>
+<style>
+:root{--bg:#121218;--bg2:#1e1e28;--bg3:#282836;--bd:#3a3a4a;--tx:#e8e8f0;--tx2:#a0a0b8;--tx3:#6a6a7e;--green:#2ec453;--red:#dc3545;--yellow:#ffc107;--blue:#0d6efd;--cyan:#00d2d3;--purple:#a55eea;--orange:#fd7e14;--pink:#e83e8c}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.6}
+.hdr{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);padding:40px 24px;text-align:center;border-bottom:3px solid var(--cyan)}
+.hdr h1{font-size:2.2rem;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hdr .sub{color:var(--tx2);font-size:1.05rem;margin-top:8px}
+.hdr .dt{color:var(--tx3);font-size:.85rem;margin-top:12px}
+.ctn{max-width:1100px;margin:0 auto;padding:24px}
+.sec{background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:24px;margin-bottom:24px}
+.sec h2{font-size:1.4rem;color:var(--cyan);margin-bottom:4px;border-bottom:2px solid var(--bd);padding-bottom:8px}
+.sec .sst{color:var(--tx3);font-size:.9rem;margin-bottom:16px}
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.mc{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:16px;text-align:center}
+.mc .ml{color:var(--tx2);font-size:.85rem;margin-bottom:8px}
+.mc .mv{font-size:1.8rem;font-weight:700}
+.rt{color:var(--tx2);margin-bottom:16px;line-height:1.7}
+.bl{color:var(--tx2);padding-left:24px;margin-bottom:16px}
+.bl li{margin-bottom:6px}
+.tc{overflow-x:auto;margin:16px 0}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--bd)}
+th{background:var(--bg2);color:var(--cyan);font-weight:600;font-size:.85rem}
+td{color:var(--tx2);font-size:.9rem}
+tr:hover td{background:rgba(0,210,211,.05)}
+.cc{margin:16px 0}.cc h4{color:var(--tx);margin-bottom:10px}
+.bar-r{display:flex;align-items:center;margin-bottom:8px}
+.bar-l{width:140px;color:var(--tx2);font-size:.85rem;text-align:right;padding-right:12px}
+.bar-c{flex:1;background:var(--bg2);border-radius:4px;height:24px;overflow:hidden}
+.bar{height:100%;border-radius:4px}
+.bar-v{width:60px;text-align:right;color:var(--tx3);font-size:.85rem}
+.ft{text-align:center;padding:20px;color:var(--tx3);font-size:.8rem;border-top:1px solid var(--bd)}
+@media print{body{background:#fff;color:#1a1a2e}.sec{border:1px solid #ccc;background:#fff}}
+</style>
+</head>
+<body>
+<div class="hdr">
+<h1>Advocacia BR - MYC Report</h1>
+<div class="sub">Escritorio de advocacia com legislacao, contratos, judicial e pesquisa</div>
+<div class="dt">MYC Advocacia BR | Gerado em 06/04/2026</div>
+</div>
+<div class="ctn">
+
+<section class="sec">
+<h2>Ferramentas</h2>
+<h3 class="sst">Calculadoras e utilidades para o escritorio</h3>
+<div class="mg">
+<div class="mc"><div class="ml">Calculadora de Prazos</div><div class="mv" style="color:var(--cyan)">calculadora_prazos.py</div></div>
+<div class="mc"><div class="ml">Calculo de Honorarios</div><div class="mv" style="color:var(--orange)">honorarios_calculator.py</div></div>
+</div>
+</section>
+
+<section class="sec">
+<h2>Areas de Atuacao</h2>
+<h3 class="sst">Areas do direito praticadas pelo escritorio</h3>
+<div class="tc">
+<table>
+<thead><tr><th>Area</th><th>Escopo</th><th>Ferramenta</th></tr></thead>
+<tbody>
+<tr><td>Civil</td><td>Contratos, responsabilidade civil, familia</td><td>calculadora_prazos.py</td></tr>
+<tr><td>Trabalhista</td><td>Reclamacoes trabalhistas, rescisoes</td><td>honorarios_calculator.py</td></tr>
+<tr><td>Tributario</td><td>Impostos, defesa fiscal, planejamento</td><td>calculadora_prazos.py</td></tr>
+<tr><td>Constitucional</td><td>Mandado de seguranca, acoes diretas</td><td>calculadora_prazos.py</td></tr>
+<tr><td>Empresarial</td><td>Societario, contratos empresariais, falencias</td><td>honorarios_calculator.py</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="sec">
+<h2>Prazos Processuais</h2>
+<h3 class="sst">Prazos referenciais conforme CPC/2015</h3>
+<div class="cc">
+<h4>Prazos Principais (dias uteis)</h4>
+<div class="bar-r"><span class="bar-l">Contestacao</span><div class="bar-c"><div class="bar" style="width:75%;background:var(--cyan)"></div></div><span class="bar-v">15 dias</span></div>
+<div class="bar-r"><span class="bar-l">Recurso Apelacao</span><div class="bar-c"><div class="bar" style="width:75%;background:var(--green)"></div></div><span class="bar-v">15 dias</span></div>
+<div class="bar-r"><span class="bar-l">Embargos Decl.</span><div class="bar-c"><div class="bar" style="width:25%;background:var(--yellow)"></div></div><span class="bar-v">5 dias</span></div>
+<div class="bar-r"><span class="bar-l">Agravo Inst.</span><div class="bar-c"><div class="bar" style="width:75%;background:var(--purple)"></div></div><span class="bar-v">15 dias</span></div>
+<div class="bar-r"><span class="bar-l">Rec. Especial</span><div class="bar-c"><div class="bar" style="width:75%;background:var(--orange)"></div></div><span class="bar-v">15 dias</span></div>
+</div>
+</section>
+
+<section class="sec">
+<h2>Honorarios Advocaticios</h2>
+<h3 class="sst">Tabela de referencia para calculo de honorarios</h3>
+<div class="tc">
+<table>
+<thead><tr><th>Tipo</th><th>Base de Calculo</th><th>Percentual Referencial</th></tr></thead>
+<tbody>
+<tr><td>Consultivo</td><td>Valor da causa / hora</td><td>10% a 20% do valor da causa</td></tr>
+<tr><td>Contencioso</td><td>Valor da condenacao</td><td>10% a 30% (exitus)</td></tr>
+<tr><td>Contratual</td><td>Pro labore mensal</td><td>Valor fixo + bonus de resultado</td></tr>
+<tr><td>Sucumbencia</td><td>Valor de condenacao</td><td>10% a 20% (art. 85, CPC)</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+</div>
+<div class="ft"><p>MYC - My Company Assistant | Gerado automaticamente em 06/04/2026</p></div>
+</body>
+</html>
