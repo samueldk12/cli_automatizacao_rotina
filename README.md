@@ -98,6 +98,18 @@ Opções de navegação:
 | `myc setup` | Gera scripts de atalho |
 | `myc setup --auto` | Gera scripts e adiciona ao PATH |
 | `myc config` | Configura caminho do Chrome |
+| `myc agent add` | Cria perfil de agente de IA (wizard) |
+| `myc agent list` | Lista agentes configurados |
+| `myc agent launch <nome>` | Lanca agente no diretorio atual |
+| `myc agent delete <nome>` | Remove agente |
+| `myc agent history` | Historico de lancamentos |
+| `myc agent plugins` | Lista plugins instalados |
+| `myc agent plugin-add` | Cria plugin customizado |
+| `myc agent bundles` | Lista bundles disponiveis |
+| `myc agent bundle-install --all` | Instala todos os bundles (64 plugins) |
+| `myc agent bundle-install <id>` | Instala bundle especifico |
+| `myc agent install-plugin <arquivo>` | Instala plugin de arquivo .py local |
+| `myc automate <agente> --group X` | Lanca agente com contexto de rotinas MYC |
 
 ---
 
@@ -195,8 +207,79 @@ cli_automatizacao_rotina/
 | `rich` | Output formatado e tabelas |
 | `questionary` | Menus interativos com setas |
 | `screeninfo` | Detecção de monitores |
+| `pyinstaller` | Build de executavel .exe |
 
 ---
+
+## Agente Padrao (sua maquina)
+
+O agente `default` ja vem configurado com seu setup (OpenRouter + qwen3.6-plus).
+Para lancar:
+
+```powershell
+myc agent launch default
+```
+
+## Bundles de Plugins (64 plugins, 16 areas)
+
+| Bundle | ID | Plugins | Uso |
+|--------|-----|---------|-----|
+| Agencia de Marketing | `marketing` | 4 | Redes sociais, SEO, copywriting, campanhas |
+| Estudio de Game Design | `gamedesign` | 4 | Level design, narrativa, mecanicas, UX |
+| Escritorio de Advocacia (BR) | `advocacia` | 4 | Legislacao, contratos, peticoes, jurisprudencia |
+| Redacao Jornalistica | `jornalismo` | 4 | Pautas, fact-checking, redacao, editorial |
+| Inteligencia OSINT | `osint` | 4 | Coleta, fontes, pegada digital, correlacao |
+| Seguranca Web | `seguranca_web` | 4 | Auditoria, OWASP, pentest, hardening |
+| Bug Bounty Hunter | `bugbounty` | 4 | Recon, exploits, relatorios, triagem |
+| Eng. de Visao Computacional | `visao_computacional` | 4 | Arquitetura, datasets, treino, deploy |
+| Desenvolvimento Full Stack | `fullstack` | 4 | Frontend, backend, banco de dados, DevOps |
+| Desenvolvimento de App Mobile | `app_mobile` | 4 | Arquitetura, UI, ponte nativa, loja |
+| Gerador de Ideias | `ideias` | 4 | Brainstorm, design thinking, validacao, MVP |
+| Vendas e Empreendedorismo | `vendas` | 4 | Pitch, funil, modelo de negocio, growth |
+| Engenharia de Dados | `data_engineering` | 4 | ETL, pipelines, qualidade, data warehouse |
+| Engenharia de Software | `software_engineering` | 4 | Arquitetura, code review, testes, CI/CD |
+| Engenharia da Computacao | `computer_engineering` | 4 | Embarcados, IoT, redes, sistemas operacionais |
+| Professor / Educador | `professor` | 4 | Planejamento, avaliacoes, didatica, conteudo |
+
+### Exemplos de uso
+
+```powershell
+# Instala todos os plugins (64)
+myc agent bundle-install --all
+
+# Instala bundle especifico e vincula ao agente
+myc agent bundle-install bugbounty --agent dev
+
+# Lanca agente com plugins ativos
+myc agent launch default
+
+# Cria plugin customizado via wizard
+myc agent plugin-add
+
+# Lista historico de uso
+myc agent history
+```
+
+### Criar plugins customizados
+
+Adicione qualquer arquivo `.py` como plugin:
+
+```powershell
+myc agent install-plugin C:/path/to/meu_plugin.py
+```
+
+Ou crie via wizard interativo:
+
+```powershell
+myc agent plugin-add
+```
+
+## Build (executavel)
+
+```powershell
+python build_exe.py
+# Gera: dist/myc.exe (~20MB)
+```
 
 ## Licença
 

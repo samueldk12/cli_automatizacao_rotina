@@ -11,6 +11,7 @@ Cada plugin e um arquivo Python em ~/.myc/agents/plugins/ que exporta:
 
 import importlib.util
 import shutil
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -21,7 +22,12 @@ console = Console()
 PLUGINS_DIR = Path.home() / ".myc" / "agents" / "plugins"
 
 # Plugins built-in dentro do pacote
-MYC_PKG = Path(__file__).parent.parent / "plugins" / "bundles"
+def _get_pkg_plugins_dir() -> Path:
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        return Path(sys._MEIPASS) / "plugins" / "bundles"
+    return Path(__file__).parent.parent / "plugins" / "bundles"
+
+MYC_PKG = _get_pkg_plugins_dir()
 
 
 def _ensure_plugins_dir() -> None:

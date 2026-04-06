@@ -6,7 +6,7 @@ a = Analysis(
     ['myc/__main__.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('plugins', 'plugins')],
     hiddenimports=[
         'click',
         'rich',

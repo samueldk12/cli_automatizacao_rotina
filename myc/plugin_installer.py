@@ -6,6 +6,7 @@ quando instalados via `myc agent bundle-install` ou `myc agent add-plugin`.
 """
 
 import shutil
+import sys
 from pathlib import Path
 
 from rich.console import Console
@@ -13,9 +14,15 @@ from rich.console import Console
 console = Console()
 
 PLUGINS_DIR = Path.home() / ".myc" / "agents" / "plugins"
-# Diretorio dos plugins built-in (dentro do pacote myc)
-MYC_DIR = Path(__file__).parent
-BUILTIN_DIR = MYC_DIR.parent / "plugins"
+
+
+def _get_builtin_dir() -> Path:
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        return Path(sys._MEIPASS) / "plugins" / "bundles"
+    return Path(__file__).parent.parent / "plugins" / "bundles"
+
+
+BUILTIN_DIR = _get_builtin_dir()
 
 # Mapa de plugin_id -> gerador de conteudo
 # Cada plugin e gerado dinamicamente para nao depender de arquivos extras
